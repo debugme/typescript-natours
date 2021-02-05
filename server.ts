@@ -10,8 +10,8 @@ import { usersRouter } from './routers/users'
 dotenv.config({
   path:
     process.env.NODE_ENV === 'production'
-      ? '.production.env'
-      : '.development.env',
+      ? '.env.production'
+      : '.env.development',
 })
 
 const {
