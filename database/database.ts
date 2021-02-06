@@ -2,17 +2,34 @@ import mongoose from 'mongoose'
 import { MongoVariables } from '../environment/environment'
 
 export class Database {
-  public static connect = async (variables: MongoVariables) => {
+  private mongoUri: string
+  private options: object
+  constructor(private variables: MongoVariables) {
+    this.mongoUri = this.getUri(variables)
+    this.options = this.getOptions()
+  }
+
+  public connect = async () => {
     try {
-      const mongoUri = Database.getUri(variables)
-      const options = Database.getOptions()
-      await mongoose.connect(mongoUri, options)
+      await mongoose.connect(this.mongoUri, this.options)
       console.info('[database] connected successfully!')
     } catch (error) {
       console.error('[database] could not connect: ', error)
     }
   }
-  private static getOptions = () => {
+
+  // public populate = async () => {
+  // .then(async (connection) => import('fs/promises'))
+  // .then((fs) => fs.readFile(`dev-data/data/tours-simple.json`, 'utf-8'))
+  // .then((data) => JSON.parse(data))
+  // .then((tours) => {
+  //   Tour.deleteMany()
+  //   Tour.create(tours)
+  // })
+  // .catch((error) => console.error(error))
+  // }
+
+  private getOptions = () => {
     const options = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -21,7 +38,8 @@ export class Database {
     }
     return options
   }
-  private static getUri = (variables: MongoVariables) => {
+
+  private getUri = (variables: MongoVariables) => {
     const {
       MONGO_PROTOCOL,
       MONGO_USERNAME,
