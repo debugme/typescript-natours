@@ -22,13 +22,14 @@ export enum StatusTexts {
 
 export const tryCatch = (
   handler: RequestHandler,
-  code = StatusCodes.BAD_REQUEST
-): ErrorRequestHandler => async (onError, request, response, next) => {
+  statusCode = StatusCodes.BAD_REQUEST
+): RequestHandler => async (request, response, next) => {
   try {
     await handler(request, response, next)
   } catch (error) {
     const message = error.toString()
-    onError(new ServerError(message, code))
+    const serverError = new ServerError(message, statusCode)
+    return next(serverError)
   }
 }
 

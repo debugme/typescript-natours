@@ -11,14 +11,14 @@ import {
   tryCatch,
 } from '../utilities/utilities'
 
-const createTour: RequestHandler = async (request, response) => {
+const createTour = tryCatch(async (request, response) => {
   const tour = await Tour.create(request.body)
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { tour } }
   response.status(StatusCodes.CREATED).json(cargo)
-}
+})
 
-const getTour: RequestHandler = async (request, response) => {
+const getTour = tryCatch(async (request, response) => {
   const {
     params: { id },
   } = request
@@ -26,9 +26,9 @@ const getTour: RequestHandler = async (request, response) => {
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { tour } }
   response.status(StatusCodes.OK).json(cargo)
-}
+})
 
-const getAllTours: RequestHandler = async (request, response) => {
+const getAllTours = tryCatch(async (request, response) => {
   const { query } = request
   const filters = getFilters(query, tourFields)
   const projection = getProjection(query)
@@ -48,9 +48,9 @@ const getAllTours: RequestHandler = async (request, response) => {
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { tours } }
   response.status(StatusCodes.OK).json(cargo)
-}
+})
 
-const updateTour: RequestHandler = async (request, response) => {
+const updateTour = tryCatch(async (request, response) => {
   const {
     body,
     params: { id },
@@ -60,9 +60,9 @@ const updateTour: RequestHandler = async (request, response) => {
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { tour } }
   response.status(StatusCodes.OK).json(cargo)
-}
+})
 
-const deleteTour: RequestHandler = async (request, response) => {
+const deleteTour = tryCatch(async (request, response) => {
   const {
     params: { id },
   } = request
@@ -70,9 +70,9 @@ const deleteTour: RequestHandler = async (request, response) => {
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { id } }
   response.status(StatusCodes.OK).json(cargo)
-}
+})
 
-const getTourStats: RequestHandler = async (request, response) => {
+const getTourStats = tryCatch(async (request, response) => {
   const pipeline: any[] = [
     { $match: { ratingsAverage: { $gte: 4.5 } } },
     {
@@ -97,9 +97,9 @@ const getTourStats: RequestHandler = async (request, response) => {
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { stats } }
   response.status(StatusCodes.OK).json(cargo)
-}
+})
 
-const getMonthlyPlan: RequestHandler = async (request, response) => {
+const getMonthlyPlan = tryCatch(async (request, response) => {
   const {
     params: { year },
   } = request
@@ -147,14 +147,14 @@ const getMonthlyPlan: RequestHandler = async (request, response) => {
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { plan } }
   response.status(StatusCodes.OK).json(cargo)
-}
+})
 
 export const toursController = {
-  createTour: tryCatch(createTour),
-  getTour: tryCatch(getTour),
-  getAllTours: tryCatch(getAllTours),
-  updateTour: tryCatch(updateTour),
-  deleteTour: tryCatch(deleteTour),
-  getTourStats: tryCatch(getTourStats),
-  getMonthlyPlan: tryCatch(getMonthlyPlan),
+  createTour,
+  getTour,
+  getAllTours,
+  updateTour,
+  deleteTour,
+  getTourStats,
+  getMonthlyPlan,
 }
