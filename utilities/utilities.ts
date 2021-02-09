@@ -1,6 +1,8 @@
-import { RequestHandler } from 'express'
 import { StatusCodes } from 'http-status-codes'
+import { RequestHandler } from 'express'
 import { pathOr, pickBy } from 'ramda'
+import jwt from 'jsonwebtoken'
+import { Environment } from '../environment/environment'
 
 export class ServerError extends Error {
   public status: string = ''
@@ -81,4 +83,13 @@ export const getSkipCount = (query: object) => {
   const skip = (page - 1) * limit
   console.log(`--> page:${page} limit:${limit} skip:${skip}`)
   return skip
+}
+
+export const buildToken = (id: string) => {
+  const environment = new Environment(process.env)
+  const jwtVariables = environment.getJwtVariables()
+  const { JWT_SECRET_KEY: secretKey, JWT_EXPIRES_IN: expiresIn } = jwtVariables
+  const options = { expiresIn }
+  const token = jwt.sign({ id }, secretKey, options)
+  return token
 }

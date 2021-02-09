@@ -1,11 +1,15 @@
 import { StatusCodes } from 'http-status-codes'
+import { pick } from 'ramda'
+
+import { buildToken, StatusTexts, tryCatch } from '../utilities/utilities'
 import { User } from '../models/user'
-import { StatusTexts, tryCatch } from '../utilities/utilities'
 
 const signUp = tryCatch(async (request, response) => {
-  const user = await User.create(request.body)
+  const fields = ['name', 'email', 'photo', 'password', 'passwordConfirm']
+  const user = await User.create(pick(fields, request.body))
+  const token = buildToken(user.id)
   const status = StatusTexts.SUCCESS
-  const cargo = { status, data: { user } }
+  const cargo = { status, token, data: { user } }
   response.status(StatusCodes.CREATED).json(cargo)
 })
 
