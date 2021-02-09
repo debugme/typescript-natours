@@ -1,5 +1,5 @@
 import { StatusCodes } from 'http-status-codes'
-import { Tour, tourFields } from '../models/tours'
+import { Tour, tourFields } from '../models/tour'
 import {
   getFilters,
   getLimitCount,
