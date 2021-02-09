@@ -4,10 +4,12 @@ import express, {
   RequestHandler,
   Router,
 } from 'express'
+import http from 'http'
 import morgan from 'morgan'
 import { ExpressVariables } from '../environment/environment'
 
 export class Server {
+  private httpServer: http.Server | undefined
   private server: Express = express()
   constructor(private variables: ExpressVariables) {
     const { PWD } = this.variables
@@ -24,8 +26,18 @@ export class Server {
   }
   public connect = () => {
     const { EXPRESS_PORT } = this.variables
-    const text = `[server] port ${EXPRESS_PORT}`
+    const text = `[server] connected...`
     const listener = () => console.info(text)
-    this.server.listen(EXPRESS_PORT, listener)
+    this.httpServer = this.server.listen(EXPRESS_PORT, listener)
+  }
+  public disconnect = () => {
+    const promise = new Promise((resolve, reject) => {
+      if (this.httpServer)
+        this.httpServer.close(() => {
+          console.log('[server] disconnected...')
+          resolve(null)
+        })
+    })
+    return promise
   }
 }

@@ -12,10 +12,21 @@ export class Database {
   public connect = async () => {
     try {
       await mongoose.connect(this.mongoUri, this.options)
-      console.info('[database] connected successfully!')
+      console.info('[database] connected')
     } catch (error) {
-      console.error('[database] could not connect: ', error)
+      console.error('[database] could not connect: ', error.message)
+      throw error
     }
+    mongoose.disconnect()
+  }
+
+  public disconnect = () => {
+    // await mongoose.disconnect()
+    // console.log('[database] disconnected...')
+    const promise = mongoose.disconnect().then(() => {
+      console.log('[database] disconnected...')
+    })
+    return promise
   }
 
   // public populate = async () => {

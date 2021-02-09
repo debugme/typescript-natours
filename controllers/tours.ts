@@ -1,4 +1,3 @@
-import { RequestHandler } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { Tour, tourFields } from '../models/tours'
 import {
@@ -7,6 +6,7 @@ import {
   getProjection,
   getSkipCount,
   getSortFields,
+  ServerError,
   StatusTexts,
   tryCatch,
 } from '../utilities/utilities'
@@ -18,11 +18,17 @@ const createTour = tryCatch(async (request, response) => {
   response.status(StatusCodes.CREATED).json(cargo)
 })
 
-const getTour = tryCatch(async (request, response) => {
+const getTour = tryCatch(async (request, response, next) => {
   const {
     params: { id },
   } = request
   const tour = await Tour.findById(id)
+  if (!tour) {
+    const message = 'could not find tour with id ${id}'
+    const statusCode = StatusCodes.NOT_FOUND
+    const serverError = new ServerError(message, statusCode)
+    return next(serverError)
+  }
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { tour } }
   response.status(StatusCodes.OK).json(cargo)
@@ -50,23 +56,35 @@ const getAllTours = tryCatch(async (request, response) => {
   response.status(StatusCodes.OK).json(cargo)
 })
 
-const updateTour = tryCatch(async (request, response) => {
+const updateTour = tryCatch(async (request, response, next) => {
   const {
     body,
     params: { id },
   } = request
   const options = { new: true, runValidators: true }
   const tour = await Tour.findByIdAndUpdate(id, body, options)
+  if (!tour) {
+    const message = 'could not find tour with id ${id}'
+    const statusCode = StatusCodes.NOT_FOUND
+    const serverError = new ServerError(message, statusCode)
+    return next(serverError)
+  }
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { tour } }
   response.status(StatusCodes.OK).json(cargo)
 })
 
-const deleteTour = tryCatch(async (request, response) => {
+const deleteTour = tryCatch(async (request, response, next) => {
   const {
     params: { id },
   } = request
-  await Tour.findByIdAndDelete(id)
+  const tour = await Tour.findByIdAndDelete(id)
+  if (!tour) {
+    const message = 'could not find tour with id ${id}'
+    const statusCode = StatusCodes.NOT_FOUND
+    const serverError = new ServerError(message, statusCode)
+    return next(serverError)
+  }
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { id } }
   response.status(StatusCodes.OK).json(cargo)

@@ -39,4 +39,8 @@ export class Environment {
     const variables = pick(properties, environment)
     return variables
   }
+  // public handleError = (handler: (error: Error) => {}) => {
+  //   process.on('uncaughtException', handler)
+  //   process.on('unhandledRejection', handler)
+  // }
 }

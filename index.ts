@@ -7,8 +7,8 @@ import { defaultRouter } from './controllers/default'
 import { errorHandler } from './controllers/error'
 
 const environment = new Environment(process.env)
-const expressVariables = environment.getExpressVariables()
 const mongoVariables = environment.getMongoVariables()
+const expressVariables = environment.getExpressVariables()
 
 const database = new Database(mongoVariables)
 database.connect()
@@ -19,3 +19,23 @@ server.handleRoute('/api/v1/users', usersRouter)
 server.handleRoute('*', defaultRouter)
 server.handleError(errorHandler)
 server.connect()
+
+process.on('uncaughtException', async (error: Error) => {
+  await database.disconnect()
+  await server.disconnect()
+  await new Promise((resolve) => {
+    console.log('[process] terminating...', error)
+    resolve(process.exit(1))
+  })
+})
+
+process.on('unhandledRejection', async (error: Error) => {
+  await database.disconnect()
+  await server.disconnect()
+  await new Promise((resolve) => {
+    console.log('[process] terminating...', error)
+    resolve(process.exit(1))
+  })
+})
+
+// throw new Error('bad boyz')
