@@ -17,7 +17,6 @@ export class Database {
       console.error('[database] could not connect: ', error.message)
       throw error
     }
-    mongoose.disconnect()
   }
 
   public disconnect = () => {
