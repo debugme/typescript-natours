@@ -1,4 +1,9 @@
-import express, { Express, Router } from 'express'
+import express, {
+  ErrorRequestHandler,
+  Express,
+  RequestHandler,
+  Router,
+} from 'express'
 import morgan from 'morgan'
 import { ExpressVariables } from '../environment/environment'
 
@@ -11,8 +16,11 @@ export class Server {
     this.server.use(express.urlencoded({ extended: true }))
     this.server.use(express.static(`${PWD}/public`))
   }
-  public addRoute = (path: string, router: Router) => {
+  public handleRoute = (path: string, router: Router) => {
     this.server.use(path, router)
+  }
+  public handleError = (handler: ErrorRequestHandler) => {
+    this.server.use(handler)
   }
   public connect = () => {
     const { EXPRESS_PORT } = this.variables

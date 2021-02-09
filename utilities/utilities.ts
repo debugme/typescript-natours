@@ -1,6 +1,18 @@
-import { RequestHandler } from 'express'
+import { ErrorRequestHandler, RequestHandler } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { pathOr, pickBy } from 'ramda'
+
+export class ServerError extends Error {
+  public status: string = ''
+  constructor(message: string, private statusCode: number) {
+    super(message)
+    this.statusCode = statusCode
+    this.status = statusCode.toString().startsWith('4')
+      ? StatusTexts.FAILURE
+      : StatusTexts.ERROR
+    Error.captureStackTrace(this, this.constructor)
+  }
+}
 
 export enum StatusTexts {
   SUCCESS = 'success',
@@ -11,14 +23,12 @@ export enum StatusTexts {
 export const tryCatch = (
   handler: RequestHandler,
   code = StatusCodes.BAD_REQUEST
-): RequestHandler => async (request, response, next) => {
+): ErrorRequestHandler => async (onError, request, response, next) => {
   try {
     await handler(request, response, next)
   } catch (error) {
-    const status = StatusTexts.FAILURE
     const message = error.toString()
-    const payload = { status, message }
-    response.status(code).json(payload)
+    onError(new ServerError(message, code))
   }
 }
 
