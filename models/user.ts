@@ -5,9 +5,9 @@ import bcrypt from 'bcrypt'
 export interface UserDocument extends Document {
   name: string
   email: string
-  photo: string | undefined
+  photo?: string
   password: string
-  passwordConfirm: string | undefined
+  passwordConfirm?: string
   isCorrectPassword: (password: string) => Promise<boolean>
 }
 

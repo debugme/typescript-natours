@@ -24,7 +24,7 @@ const getTour = tryCatch(async (request, response, next) => {
   } = request
   const tour = await Tour.findById(id)
   if (!tour) {
-    const message = 'could not find tour with id ${id}'
+    const message = `could not find tour with id ${id}`
     const statusCode = StatusCodes.NOT_FOUND
     const serverError = new ServerError(message, statusCode)
     return next(serverError)
