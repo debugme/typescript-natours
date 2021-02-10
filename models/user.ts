@@ -24,6 +24,7 @@ const definition = {
     required: [true, 'Please provide a password'],
     trim: true,
     minlength: 8,
+    select: false, // set to false to ensure it is not sent back to client when this user document is requested
   },
   passwordConfirm: {
     type: String,
@@ -57,6 +58,12 @@ userSchema.pre('save', async function (next) {
   }
   next()
 })
+
+// Create a new instance method for for documents in the users collection
+userSchema.methods.isCorrectPassword = async function (password: string) {
+  // @ts-ignore
+  return await bcrypt.compare(password, this.password)
+}
 
 export const userFields = Object.keys(userSchema.obj)
 

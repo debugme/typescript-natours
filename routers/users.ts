@@ -5,7 +5,9 @@ import { usersController } from '../controllers/users'
 
 export const usersRouter = Router()
 
-usersRouter.post('/signup', authController.signUp)
+usersRouter
+  .post('/signup', authController.signUp)
+  .post('/signin', authController.signIn)
 
 usersRouter
   .route('/')
