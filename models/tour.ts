@@ -76,11 +76,6 @@ export const TourSchema = new mongoose.Schema<TourDocument>(
         ): boolean {
           // Note: this validation will only work when creating a new document,
           // not when updating an existing document
-          // console.info(
-          //   '--> priceDiscount, this.price',
-          //   priceDiscount,
-          //   this.price
-          // )
           return priceDiscount < this.price
         },
         message: 'Error - price discount of {VALUE} must be less than price',

@@ -37,5 +37,3 @@ process.on('unhandledRejection', async (error: Error) => {
     resolve(process.exit(1))
   })
 })
-
-// throw new Error('bad boyz')

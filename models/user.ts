@@ -67,7 +67,7 @@ UserSchema.pre('save', async function (next) {
   next()
 })
 
-// Create a new instance method for for documents in the users collection
+// Create a new instance method for documents in the users collection
 UserSchema.methods.isCorrectPassword = async function (password: string) {
   return await bcrypt.compare(password, this.password)
 }

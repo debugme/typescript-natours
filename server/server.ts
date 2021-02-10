@@ -1,6 +1,7 @@
-import express, { ErrorRequestHandler, Express, Router } from 'express'
 import http from 'http'
 import morgan from 'morgan'
+import express, { ErrorRequestHandler, Express, Router } from 'express'
+
 import { ExpressVariables } from '../environment/environment'
 
 export class Server {
@@ -25,18 +26,20 @@ export class Server {
 
   public connect = () => {
     const { EXPRESS_PORT } = this.variables
-    const text = `[server] connected...`
-    const listener = () => console.info(text)
+    const listener = () => console.log('[server] connected...')
     this.httpServer = this.server.listen(EXPRESS_PORT, listener)
   }
 
   public disconnect = () => {
     const promise = new Promise((resolve, reject) => {
-      if (this.httpServer)
+      if (this.httpServer) {
         this.httpServer.close(() => {
           console.log('[server] disconnected...')
           resolve(null)
         })
+      } else {
+        reject('error - already disconnected')
+      }
     })
     return promise
   }

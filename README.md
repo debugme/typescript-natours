@@ -20,3 +20,7 @@ $ docker run -d -p 27017-27019:27017-27019 --name mongodb mongo
 ```sh
 $ docker exec -it mongodb mongo
 ```
+
+## TODO
+
+• in some controller methods you pass errors to next(); in others you throw an error. Update the code to use the latter approach consistently.
