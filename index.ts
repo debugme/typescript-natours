@@ -1,8 +1,8 @@
 import { Server } from './server/server'
 import { Database } from './database/database'
 import { Environment } from './environment/environment'
-import { toursRouter } from './routers/tours'
-import { usersRouter } from './routers/users'
+import { tourRouter } from './routers/tour'
+import { userRouter } from './routers/user'
 import { defaultRouter } from './controllers/default'
 import { errorHandler } from './controllers/error'
 
@@ -14,8 +14,8 @@ const database = new Database(mongoVariables)
 database.connect()
 
 const server = new Server(expressVariables)
-server.handleRoute('/api/v1/tours', toursRouter)
-server.handleRoute('/api/v1/users', usersRouter)
+server.handleRoute('/api/v1/tours', tourRouter)
+server.handleRoute('/api/v1/users', userRouter)
 server.handleRoute('*', defaultRouter)
 server.handleError(errorHandler)
 server.connect()

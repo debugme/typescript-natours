@@ -167,7 +167,7 @@ const getMonthlyPlan = tryCatch(async (request, response) => {
   response.status(StatusCodes.OK).json(cargo)
 })
 
-export const toursController = {
+export const tourController = {
   createTour,
   getTour,
   getAllTours,

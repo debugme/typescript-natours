@@ -8,7 +8,9 @@ export interface UserDocument extends Document {
   photo?: string
   password: string
   passwordConfirm?: string
+  passwordChangedAt?: Date
   isCorrectPassword: (password: string) => Promise<boolean>
+  changedPassword: (timestamp: number) => boolean
 }
 
 export const UserSchema = new mongoose.Schema<UserDocument>(
@@ -49,6 +51,7 @@ export const UserSchema = new mongoose.Schema<UserDocument>(
         message: 'Passwords are not the same',
       },
     },
+    passwordChangedAt: Date,
   },
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 )
@@ -67,6 +70,14 @@ UserSchema.pre('save', async function (next) {
 // Create a new instance method for for documents in the users collection
 UserSchema.methods.isCorrectPassword = async function (password: string) {
   return await bcrypt.compare(password, this.password)
+}
+
+UserSchema.methods.isPasswordUpdated = function (tokenCreated: number) {
+  if (this.passwordChangedAt) {
+    const passwordChanged = this.passwordChangedAt.getTime() / 1000
+    return passwordChanged > tokenCreated
+  }
+  return false
 }
 
 export const userFields = Object.keys(UserSchema.obj)

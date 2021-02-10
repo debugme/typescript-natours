@@ -2,6 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import { RequestHandler } from 'express'
 import { pathOr, pickBy } from 'ramda'
 import jwt from 'jsonwebtoken'
+
 import { Environment } from '../environment/environment'
 
 export class ServerError extends Error {
@@ -81,7 +82,7 @@ export const getSkipCount = (query: object) => {
   const limit = getLimitCount(query)
   const page = getPageCount(query)
   const skip = (page - 1) * limit
-  console.log(`--> page:${page} limit:${limit} skip:${skip}`)
+  // console.log(`--> page:${page} limit:${limit} skip:${skip}`)
   return skip
 }
 
@@ -93,3 +94,16 @@ export const buildToken = (id: string) => {
   const token = jwt.sign({ id }, secretKey, options)
   return token
 }
+
+// export const verifyToken = async (token: string) => {
+// const environment = new Environment(process.env)
+// const jwtVariables = environment.getJwtVariables()
+// const { JWT_SECRET_KEY: secretKey, JWT_EXPIRES_IN: expiresIn } = jwtVariables
+// const decoded = await new Promise((resolve, reject) => {
+//   jwt.verify(token, secretKey, (error, decoded) => {
+//     if (error) reject(error)
+//     else resolve(decoded)
+//   })
+// })
+// console.log('--> decoded is ', decoded)
+// }

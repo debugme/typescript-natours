@@ -60,7 +60,7 @@ const deleteUser = tryCatch(async (request, response) => {
   response.status(500).json(cargo)
 })
 
-export const usersController = {
+export const userController = {
   createUser,
   getUser,
   getAllUsers,
