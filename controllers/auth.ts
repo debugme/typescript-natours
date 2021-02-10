@@ -35,7 +35,6 @@ const signIn = tryCatch(async (request, response, next) => {
       new ServerError('Please provide known email', StatusCodes.BAD_REQUEST)
     )
 
-  // @ts-ignore
   const isCorrectPassword = await user.isCorrectPassword(password)
   if (!isCorrectPassword)
     return next(
