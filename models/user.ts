@@ -73,11 +73,9 @@ UserSchema.methods.isCorrectPassword = async function (password: string) {
 }
 
 UserSchema.methods.isPasswordUpdated = function (tokenCreated: number) {
-  if (this.passwordChangedAt) {
-    const passwordChanged = this.passwordChangedAt.getTime() / 1000
-    return passwordChanged > tokenCreated
-  }
-  return false
+  if (!this.passwordChangedAt) return false
+  const passwordChanged = this.passwordChangedAt.getTime() / 1000
+  return passwordChanged > tokenCreated
 }
 
 export const userFields = Object.keys(UserSchema.obj)
