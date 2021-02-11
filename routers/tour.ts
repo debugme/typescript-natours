@@ -13,9 +13,13 @@ tourRouter
   .route('/:id')
   .get(tourController.getTour)
   .patch(tourController.updateTour)
-  .delete(tourController.deleteTour)
+  .delete(
+    authController.isAuthenticated,
+    authController.isAuthorised('lead-guide', 'admin'),
+    tourController.deleteTour
+  )
 
 tourRouter
   .route('/')
-  .get(authController.isAuthorised, tourController.getAllTours)
+  .get(authController.isAuthenticated, tourController.getAllTours)
   .post(tourController.createTour)

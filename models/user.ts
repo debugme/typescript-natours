@@ -9,6 +9,7 @@ export interface UserDocument extends Document {
   password: string
   passwordConfirm?: string
   passwordChangedAt?: Date
+  role: String
   isCorrectPassword: (password: string) => Promise<boolean>
   changedPassword: (timestamp: number) => boolean
 }
@@ -30,6 +31,11 @@ export const UserSchema = new mongoose.Schema<UserDocument>(
     },
     photo: {
       type: String,
+    },
+    role: {
+      type: String,
+      enum: ['user', 'guide', 'lead-guide', 'admin'],
+      default: 'user',
     },
     password: {
       type: String,

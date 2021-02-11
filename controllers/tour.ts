@@ -52,7 +52,7 @@ const getAllTours = tryCatch(async (request, response) => {
     .limit(limitCount)
 
   const status = StatusTexts.SUCCESS
-  const cargo = { status, data: { tours } }
+  const cargo = { status, meta: { results: tours.length }, data: { tours } }
   response.status(StatusCodes.OK).json(cargo)
 })
 

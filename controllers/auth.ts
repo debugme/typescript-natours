@@ -12,7 +12,14 @@ import { User } from '../models/user'
 import { Environment } from '../environment/environment'
 
 const signUp = tryCatch(async (request, response) => {
-  const fields = ['name', 'email', 'photo', 'password', 'passwordConfirm']
+  const fields = [
+    'name',
+    'email',
+    'photo',
+    'password',
+    'passwordConfirm',
+    'role',
+  ]
   const data = await User.create(pick(fields, request.body))
   const user = omit(['password'], data.toJSON())
   const token = buildToken(user.id)
@@ -52,7 +59,7 @@ const signIn = tryCatch(async (request, response, next) => {
   response.status(StatusCodes.OK).json(cargo)
 })
 
-const isAuthorised = tryCatch(async (request, response, next) => {
+const isAuthenticated = tryCatch(async (request, response, next) => {
   //Case 1: make sure authorization header is in the request
   const {
     headers: { authorization },
@@ -67,9 +74,9 @@ const isAuthorised = tryCatch(async (request, response, next) => {
   const [_, token] = authorization.split(' ')
   if (!token) throw new Error('user not logged in')
 
-  //Case 4: make sure token has
-  // (a) not been tampered with
-  // (b) has not expired
+  //Case 4: make sure
+  // (a) token has not been tampered with
+  // (b) token has not expired yet
   const environment = new Environment(process.env)
   const jwtVariables = environment.getJwtVariables()
   const { JWT_SECRET_KEY: secretKey } = jwtVariables
@@ -91,12 +98,25 @@ const isAuthorised = tryCatch(async (request, response, next) => {
     throw new Error('please login again')
   }
 
+  // @ts-ignore
+  // Store the current user for use in isAuthorised()
+  request.currentUser = user
+
   //Default: allow access to protected route
   next()
 })
 
+const isAuthorised = (...roles: string[]) => {
+  return tryCatch(async (request, response, next) => {
+    // @ts-ignore
+    if (!roles.includes(request.currentUser.role))
+      throw new Error('user not allowed to perform this operation')
+    next()
+  })
+}
 export const authController = {
   signUp,
   signIn,
+  isAuthenticated,
   isAuthorised,
 }
