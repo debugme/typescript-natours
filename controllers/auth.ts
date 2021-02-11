@@ -3,13 +3,18 @@ import { omit, pick } from 'ramda'
 import jwt from 'jsonwebtoken'
 
 import {
-  buildToken,
+  buildAccessToken,
   StatusTexts,
   tryCatch,
   ServerError,
+  sendEmail,
+  buildEmailOptions,
+  buildResetToken,
+  sendAccessToken,
 } from '../utilities/utilities'
 import { User } from '../models/user'
 import { Environment } from '../environment/environment'
+import { Request } from 'express'
 
 const signUp = tryCatch(async (request, response) => {
   const fields = [
@@ -22,7 +27,7 @@ const signUp = tryCatch(async (request, response) => {
   ]
   const data = await User.create(pick(fields, request.body))
   const user = omit(['password'], data.toJSON())
-  const token = buildToken(user.id)
+  const token = buildAccessToken(user.id)
   const status = StatusTexts.SUCCESS
   const cargo = { status, token, data: { user } }
   response.status(StatusCodes.CREATED).json(cargo)
@@ -53,10 +58,7 @@ const signIn = tryCatch(async (request, response, next) => {
       )
     )
 
-  const token = buildToken(user.id)
-  const status = StatusTexts.SUCCESS
-  const cargo = { status, token }
-  response.status(StatusCodes.OK).json(cargo)
+  sendAccessToken(user.id, response)
 })
 
 const isAuthenticated = tryCatch(async (request, response, next) => {
@@ -114,9 +116,54 @@ const isAuthorised = (...roles: string[]) => {
     next()
   })
 }
+
+const forgotPassword = tryCatch(async (request, response, next) => {
+  const { email } = request.body
+  if (!email) throw new Error('please provide an email address')
+  const user = await User.findOne({ email })
+  if (!user) throw new Error('no user found with that email address')
+  const resetToken = user.setPasswordResetFields()
+  await user.save({ validateBeforeSave: false })
+
+  try {
+    const emailOptions = buildEmailOptions(request, resetToken)
+    await sendEmail(emailOptions)
+  } catch (error) {
+    user.passwordResetToken = undefined
+    user.passwordResetExpires = undefined
+    await user.save({ validateBeforeSave: false })
+    throw error
+  }
+
+  const status = StatusTexts.SUCCESS
+  const message = `password reset link sent to ${email} (Only valid for the next 10 mins)`
+  const cargo = { status, message }
+  response.status(StatusCodes.OK).json(cargo)
+})
+
+const resetPassword = tryCatch(async (request, response, next) => {
+  const {
+    params: { token: hashedToken },
+    body: { password, passwordConfirm },
+  } = request
+
+  const passwordResetToken = buildResetToken(hashedToken)
+  const passwordResetExpires = { $gt: new Date() }
+  const filters = { passwordResetToken, passwordResetExpires }
+  const user = await User.findOne(filters)
+  if (!user)
+    throw new Error('Password reset token is either invalid or expired')
+  user.resetPassword(password, passwordConfirm)
+  await user.save()
+
+  sendAccessToken(user.id, response)
+})
+
 export const authController = {
   signUp,
   signIn,
   isAuthenticated,
   isAuthorised,
+  forgotPassword,
+  resetPassword,
 }

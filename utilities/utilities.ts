@@ -1,7 +1,9 @@
 import { StatusCodes } from 'http-status-codes'
-import { RequestHandler } from 'express'
+import { RequestHandler, Response } from 'express'
 import { pathOr, pickBy } from 'ramda'
+import nodemailer from 'nodemailer'
 import jwt from 'jsonwebtoken'
+import crypto from 'crypto'
 
 import { Environment } from '../environment/environment'
 
@@ -85,11 +87,63 @@ export const getSkipCount = (query: object) => {
   return skip
 }
 
-export const buildToken = (id: string) => {
+export const buildAccessToken = (id: string) => {
   const environment = new Environment(process.env)
-  const jwtVariables = environment.getJwtVariables()
-  const { JWT_SECRET_KEY: secretKey, JWT_EXPIRES_IN: expiresIn } = jwtVariables
+  const variables = environment.getJwtVariables()
+  const { JWT_SECRET_KEY: secretKey, JWT_EXPIRES_IN: expiresIn } = variables
   const options = { expiresIn }
   const token = jwt.sign({ id }, secretKey, options)
   return token
+}
+
+export const buildResetToken = (token: string) =>
+  crypto.createHash('sha256').update(token).digest('hex')
+
+export const sendAccessToken = (id: string, response: Response) => {
+  const token = buildAccessToken(id)
+  const status = StatusTexts.SUCCESS
+  const cargo = { status, token }
+  response.status(StatusCodes.OK).json(cargo)
+}
+
+export const buildEmailOptions = (
+  request: any,
+  resetToken: string
+): EmailOptions => {
+  const url = [
+    `${request.protocol}://`,
+    request.get('host'),
+    '/api/v1/users/reset-password/',
+    resetToken,
+  ].join('')
+  const from = 'admin@natours.com'
+  const to = request.body.email
+  const subject = 'Natours - Password Reset (Valid for 10 mins)'
+  const text = `
+  Forgot your password? Submit a PATCH request with your new password and passwordConfirm to ${url}
+  If you didn't request a password reset, please ignore this email
+  `
+  const emailOptions = { from, to, subject, text }
+  return emailOptions
+}
+
+export interface EmailOptions {
+  from: string
+  to: string
+  subject: string
+  text: string
+}
+
+export const sendEmail = async (emailOptions: EmailOptions) => {
+  const environment = new Environment(process.env)
+  const variables = environment.getEmailVariables()
+  const host = variables.EMAIL_HOST
+  const port = variables.EMAIL_PORT
+  const user = variables.EMAIL_USER
+  const pass = variables.EMAIL_PASS
+  const transporterOptions = { host, port, auth: { user, pass } }
+  const transporter = nodemailer.createTransport(transporterOptions)
+
+  const result = await transporter.sendMail(emailOptions)
+  console.log('--> result is ', result)
 }

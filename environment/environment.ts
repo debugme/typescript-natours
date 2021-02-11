@@ -19,11 +19,25 @@ export interface JwtVariables {
   JWT_EXPIRES_IN: string
 }
 
+export interface EmailVariables {
+  EMAIL_HOST: string
+  EMAIL_PORT: number
+  EMAIL_USER: string
+  EMAIL_PASS: string
+}
+
 export class Environment {
   constructor(private environment: NodeJS.ProcessEnv) {
     const { PWD, NODE_ENV } = environment
     const path = `${PWD}/environment/.${NODE_ENV}.env`
     dotenv.config({ path })
+  }
+
+  public getExpressVariables = (): ExpressVariables => {
+    const properties = ['EXPRESS_PORT', 'PWD']
+    const environment = (this.environment as unknown) as ExpressVariables
+    const variables = pick(properties, environment)
+    return variables
   }
 
   public getMongoVariables = (): MongoVariables => {
@@ -38,16 +52,26 @@ export class Environment {
     const variables = pick(properties, environment)
     return variables
   }
+
   public getJwtVariables = (): JwtVariables => {
     const properties = ['JWT_SECRET_KEY', 'JWT_EXPIRES_IN']
     const environment = (this.environment as unknown) as JwtVariables
     const variables = pick(properties, environment)
     return variables
   }
-  public getExpressVariables = (): ExpressVariables => {
-    const properties = ['EXPRESS_PORT', 'PWD']
-    const environment = (this.environment as unknown) as ExpressVariables
+
+  public getEmailVariables = (): EmailVariables => {
+    const properties = ['EMAIL_HOST', 'EMAIL_PORT', 'EMAIL_USER', 'EMAIL_PASS']
+    const environment = (this.environment as unknown) as EmailVariables
     const variables = pick(properties, environment)
     return variables
   }
+
+  // TODO: replace all your custom getXXXVariables with a generic one
+  // public getVariables = <T, V>(): T => {
+  //   const properties = ['EMAIL_USERNAME', 'EMAIL_PASSWORD']
+  //   const environment = (this.environment as unknown) as T
+  //   const variables = pick(properties, environment) as T
+  //   return variables
+  // }
 }

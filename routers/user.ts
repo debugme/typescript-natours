@@ -8,6 +8,8 @@ export const userRouter = Router()
 userRouter
   .post('/signup', authController.signUp)
   .post('/signin', authController.signIn)
+  .post('/forgot-password', authController.forgotPassword)
+  .patch('/reset-password/:token', authController.resetPassword)
 
 userRouter
   .route('/')

@@ -1,6 +1,7 @@
 import mongoose, { Document } from 'mongoose'
 import validator from 'validator'
 import bcrypt from 'bcrypt'
+import crypto from 'crypto'
 
 export interface UserDocument extends Document {
   name: string
@@ -9,9 +10,13 @@ export interface UserDocument extends Document {
   password: string
   passwordConfirm?: string
   passwordChangedAt?: Date
+  passwordResetToken?: string
+  passwordResetExpires?: Date
   role: String
   isCorrectPassword: (password: string) => Promise<boolean>
   changedPassword: (timestamp: number) => boolean
+  setPasswordResetFields: () => string
+  resetPassword: (password: string, passwordConfirm: string) => void
 }
 
 export const UserSchema = new mongoose.Schema<UserDocument>(
@@ -58,6 +63,8 @@ export const UserSchema = new mongoose.Schema<UserDocument>(
       },
     },
     passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 )
@@ -73,6 +80,13 @@ UserSchema.pre('save', async function (next) {
   next()
 })
 
+// UserSchema.pre('save', function (next) {
+//   if (!this.isModified('password')) return next()
+//   if (this.isNew) return next()
+//   this.passwordChangedAt = new Date(Date.now() - 1000) // hack incase token generated before document saved
+//   next()
+// })
+
 // Create a new instance method for documents in the users collection
 UserSchema.methods.isCorrectPassword = async function (password: string) {
   return await bcrypt.compare(password, this.password)
@@ -82,6 +96,30 @@ UserSchema.methods.isPasswordUpdated = function (tokenCreated: number) {
   if (!this.passwordChangedAt) return false
   const passwordChanged = this.passwordChangedAt.getTime() / 1000
   return passwordChanged > tokenCreated
+}
+
+UserSchema.methods.setPasswordResetFields = function () {
+  const expiryDate = new Date(Date.now() + 10 * 60 * 1000)
+  const resetToken = crypto.randomBytes(32).toString('hex')
+
+  this.passwordResetExpires = expiryDate
+  this.passwordResetToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex')
+
+  return resetToken
+}
+
+UserSchema.methods.resetPassword = function (
+  password: string,
+  passwordConfirm: string
+) {
+  this.password = password
+  this.passwordConfirm = passwordConfirm
+  this.passwordChangedAt = new Date()
+  this.passwordResetToken = undefined
+  this.passwordResetExpires = undefined
 }
 
 export const userFields = Object.keys(UserSchema.obj)
