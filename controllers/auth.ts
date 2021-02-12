@@ -8,7 +8,7 @@ import {
 } from '../utilities/controllerUtils'
 import {
   buildAccessToken,
-  hashToken,
+  hashResetToken,
   decodeAccessToken,
 } from '../utilities/tokenUtils'
 import { User } from '../models/user'
@@ -37,9 +37,9 @@ const validateSignUp = tryCatch(async (request, response, next) => {
 const signUp = (environment: Environment) =>
   tryCatch(async (request, response) => {
     const { user } = request.body
-    const token = buildAccessToken(environment, user.id)
+    const accessToken = buildAccessToken(environment, user.id)
     const status = StatusTexts.SUCCESS
-    const cargo = { status, token, data: { user } }
+    const cargo = { status, accessToken, data: { user } }
     response.status(StatusCodes.CREATED).json(cargo)
   })
 
@@ -59,9 +59,9 @@ const validateSignIn = tryCatch(async (request, response, next) => {
 const signIn = (environment: Environment) =>
   tryCatch(async (request, response) => {
     const userId = request.body.user.id
-    const token = buildAccessToken(environment, userId)
+    const accessToken = buildAccessToken(environment, userId)
     const status = StatusTexts.SUCCESS
-    const cargo = { status, token }
+    const cargo = { status, accessToken }
     response.status(StatusCodes.OK).json(cargo)
   })
 
@@ -74,19 +74,22 @@ const validateIsAuthenticated = (environment: Environment) =>
     if (!authorization.toLowerCase().startsWith('bearer'))
       throw new ServerError('Please provide correct authorization header')
 
-    const [_, token] = authorization.split(' ')
-    if (!token) throw new ServerError('Please make sure you are logged in')
+    const [_, accessToken] = authorization.split(' ')
+    if (!accessToken)
+      throw new ServerError('Please make sure you are logged in')
 
     const jwtVariables = environment.getJwtVariables()
     const { JWT_SECRET_KEY: secretKey } = jwtVariables
-    const decoded = decodeAccessToken(token, secretKey)
+    const decoded = decodeAccessToken(accessToken, secretKey)
     if (!decoded)
-      throw new ServerError('Token has expired or been tampered with')
+      throw new ServerError('Access token has expired or been tampered with')
 
     const user = await User.findById(decoded.id)
     if (!user) throw new ServerError('User does not exist')
-    if (user.isPasswordUpdated(decoded.iat)) {
-      throw new Error('Password updated since login. Please login again.')
+    if (user.isStaleAccessToken(decoded.iat)) {
+      throw new Error(
+        'Password updated since access token was generated. Please login again.'
+      )
     }
 
     request.body.user = user
@@ -104,15 +107,15 @@ const validateIsAuthorised = (...roles: string[]) => {
   })
 }
 
-const validateForgotPassword = () =>
-  tryCatch(async (request, response, next) => {
-    const { email } = request.body
-    if (!email) throw new ServerError('Please provide an email address')
-    const user = await User.findOne({ email })
-    if (!user) throw new ServerError('No user found with that email address')
-    request.body.user = user
-    next()
-  })
+const validateForgotPassword = tryCatch(async (request, response, next) => {
+  const { email } = request.body
+  if (!email) throw new ServerError('Please provide an email address')
+  const user = await User.findOne({ email })
+  if (!user) throw new ServerError('No user found with that email address')
+  request.body.user = user
+  console.log('--> inside validateForgotPassword()....')
+  next()
+})
 
 const forgotPassword = (environment: Environment, emailer: Emailer) => {
   const buildOptions = (request: Request, resetToken: string) => {
@@ -142,7 +145,7 @@ const forgotPassword = (environment: Environment, emailer: Emailer) => {
       await emailer.sendEmail(emailOptions)
       const status = StatusTexts.SUCCESS
       const message = `password reset link sent to ${email} (Only valid for the next 10 mins)`
-      const cargo = { status, token: resetToken, message }
+      const cargo = { status, resetToken, message }
       response.status(StatusCodes.OK).json(cargo)
     } catch (error) {
       user.passwordResetToken = undefined
@@ -154,8 +157,8 @@ const forgotPassword = (environment: Environment, emailer: Emailer) => {
 }
 
 const validateResetPassword = tryCatch(async (request, response, next) => {
-  const { token } = request.params
-  const passwordResetToken = hashToken(token)
+  const { resetToken } = request.params
+  const passwordResetToken = hashResetToken(resetToken)
   const passwordResetExpires = { $gt: new Date() }
   const filters = { passwordResetToken, passwordResetExpires }
   const user = await User.findOne(filters)
@@ -170,9 +173,9 @@ const resetPassword = (environment: Environment) =>
     const { password, passwordConfirm, user } = request.body
     user.resetPassword(password, passwordConfirm)
     await user.save()
-    const token = buildAccessToken(environment, user.id)
+    const accessToken = buildAccessToken(environment, user.id)
     const status = StatusTexts.SUCCESS
-    const cargo = { status, token }
+    const cargo = { status, accessToken }
     response.status(StatusCodes.OK).json(cargo)
   })
 

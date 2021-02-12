@@ -24,7 +24,7 @@ export const buildUserRouter = (environment: Environment, emailer: Emailer) => {
       authController.forgotPassword(environment, emailer)
     )
     .patch(
-      '/reset-password/:token',
+      '/reset-password/:resetToken',
       authController.validateResetPassword,
       authController.resetPassword(environment)
     )

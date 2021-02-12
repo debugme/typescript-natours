@@ -6,13 +6,13 @@ const buildAccessToken = (environment: Environment, id: string) => {
   const variables = environment.getJwtVariables()
   const { JWT_SECRET_KEY: secretKey, JWT_EXPIRES_IN: expiresIn } = variables
   const options = { expiresIn }
-  const token = jsonwebtoken.sign({ id }, secretKey, options)
-  return token
+  const accessToken = jsonwebtoken.sign({ id }, secretKey, options)
+  return accessToken
 }
 
-const decodeAccessToken = (token: string, secretKey: string) => {
+const decodeAccessToken = (accessToken: string, secretKey: string) => {
   try {
-    const data = jsonwebtoken.verify(token, secretKey) as {
+    const data = jsonwebtoken.verify(accessToken, secretKey) as {
       id: string
       iat: number
     }
@@ -22,7 +22,7 @@ const decodeAccessToken = (token: string, secretKey: string) => {
   }
 }
 
-const hashToken = (token: string) =>
-  crypto.createHash('sha256').update(token).digest('hex')
+const hashResetToken = (resetToken: string) =>
+  crypto.createHash('sha256').update(resetToken).digest('hex')
 
-export { buildAccessToken, decodeAccessToken, hashToken }
+export { buildAccessToken, decodeAccessToken, hashResetToken }

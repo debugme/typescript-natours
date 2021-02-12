@@ -2,7 +2,7 @@ import mongoose, { Document } from 'mongoose'
 import validator from 'validator'
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
-import { hashToken } from '../utilities/tokenUtils'
+import { hashResetToken } from '../utilities/tokenUtils'
 
 export interface UserDocument extends Document {
   name: string
@@ -15,7 +15,7 @@ export interface UserDocument extends Document {
   passwordResetExpires?: Date
   role: String
   isCorrectPassword: (password: string) => Promise<boolean>
-  isPasswordUpdated: (tokenCreated: number) => boolean
+  isStaleAccessToken: (tokenCreated: number) => boolean
   changedPassword: (timestamp: number) => boolean
   setPasswordResetFields: () => string
   resetPassword: (password: string, passwordConfirm: string) => void
@@ -94,7 +94,7 @@ UserSchema.methods.isCorrectPassword = async function (password: string) {
   return await bcrypt.compare(password, this.password)
 }
 
-UserSchema.methods.isPasswordUpdated = function (tokenCreated: number) {
+UserSchema.methods.isStaleAccessToken = function (tokenCreated: number) {
   if (!this.passwordChangedAt) return false
   const passwordChanged = this.passwordChangedAt.getTime() / 1000
   return passwordChanged > tokenCreated
@@ -104,7 +104,7 @@ UserSchema.methods.setPasswordResetFields = function () {
   const expiryDate = new Date(Date.now() + 10 * 60 * 1000)
   const resetToken = crypto.randomBytes(32).toString('hex')
   this.passwordResetExpires = expiryDate
-  this.passwordResetToken = hashToken(resetToken)
+  this.passwordResetToken = hashResetToken(resetToken)
   return resetToken
 }
 
