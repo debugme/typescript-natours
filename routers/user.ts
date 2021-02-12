@@ -6,10 +6,18 @@ import { userController } from '../controllers/user'
 export const userRouter = Router()
 
 userRouter
-  .post('/signup', authController.signUp)
-  .post('/signin', authController.signIn)
-  .post('/forgot-password', authController.forgotPassword)
-  .patch('/reset-password/:token', authController.resetPassword)
+  .post('/signup', authController.validateSignUp, authController.signUp)
+  .post('/signin', authController.validateSignIn, authController.signIn)
+  .post(
+    '/forgot-password',
+    authController.validateForgotPassword,
+    authController.forgotPassword
+  )
+  .patch(
+    '/reset-password/:token',
+    authController.validateResetPassword,
+    authController.resetPassword
+  )
 
 userRouter
   .route('/')

@@ -1,15 +1,18 @@
 import { StatusCodes } from 'http-status-codes'
-import { RequestHandler, Response } from 'express'
+import { RequestHandler, Request } from 'express'
 import { pathOr, pickBy } from 'ramda'
 import nodemailer from 'nodemailer'
-import jwt from 'jsonwebtoken'
+import jsonwebtoken from 'jsonwebtoken'
 import crypto from 'crypto'
 
 import { Environment } from '../environment/environment'
 
 export class ServerError extends Error {
   public status: string = ''
-  constructor(message: string, private statusCode: number) {
+  constructor(
+    message: string,
+    private statusCode: number = StatusCodes.BAD_REQUEST
+  ) {
     super(message)
     this.statusCode = statusCode
     this.status = statusCode.toString().startsWith('4')
@@ -25,16 +28,15 @@ export enum StatusTexts {
   ERROR = 'error',
 }
 
-export const tryCatch = (
-  handler: RequestHandler,
-  statusCode = StatusCodes.BAD_REQUEST
-): RequestHandler => async (request, response, next) => {
+export const tryCatch = (handler: RequestHandler): RequestHandler => async (
+  request,
+  response,
+  next
+) => {
   try {
     await handler(request, response, next)
   } catch (error) {
-    const message = error.toString()
-    const serverError = new ServerError(message, statusCode)
-    return next(serverError)
+    return next(error)
   }
 }
 
@@ -87,27 +89,8 @@ export const getSkipCount = (query: object) => {
   return skip
 }
 
-export const buildAccessToken = (id: string) => {
-  const environment = new Environment(process.env)
-  const variables = environment.getJwtVariables()
-  const { JWT_SECRET_KEY: secretKey, JWT_EXPIRES_IN: expiresIn } = variables
-  const options = { expiresIn }
-  const token = jwt.sign({ id }, secretKey, options)
-  return token
-}
-
-export const buildResetToken = (token: string) =>
-  crypto.createHash('sha256').update(token).digest('hex')
-
-export const sendAccessToken = (id: string, response: Response) => {
-  const token = buildAccessToken(id)
-  const status = StatusTexts.SUCCESS
-  const cargo = { status, token }
-  response.status(StatusCodes.OK).json(cargo)
-}
-
 export const buildEmailOptions = (
-  request: any,
+  request: Request,
   resetToken: string
 ): EmailOptions => {
   const url = [
@@ -118,7 +101,7 @@ export const buildEmailOptions = (
   ].join('')
   const from = 'admin@natours.com'
   const to = request.body.email
-  const subject = 'Natours - Password Reset (Valid for 10 mins)'
+  const subject = 'Natours - Password Reset (Only valid for 10 mins)'
   const text = `
   Forgot your password? Submit a PATCH request with your new password and passwordConfirm to ${url}
   If you didn't request a password reset, please ignore this email
@@ -143,7 +126,30 @@ export const sendEmail = async (emailOptions: EmailOptions) => {
   const pass = variables.EMAIL_PASS
   const transporterOptions = { host, port, auth: { user, pass } }
   const transporter = nodemailer.createTransport(transporterOptions)
-
   const result = await transporter.sendMail(emailOptions)
   console.log('--> result is ', result)
 }
+
+export const buildAccessToken = (id: string) => {
+  const environment = new Environment(process.env)
+  const variables = environment.getJwtVariables()
+  const { JWT_SECRET_KEY: secretKey, JWT_EXPIRES_IN: expiresIn } = variables
+  const options = { expiresIn }
+  const token = jsonwebtoken.sign({ id }, secretKey, options)
+  return token
+}
+
+export const decodeAccessToken = (token: string, secretKey: string) => {
+  try {
+    const data = jsonwebtoken.verify(token, secretKey) as {
+      id: string
+      iat: number
+    }
+    return data
+  } catch (error) {
+    return null
+  }
+}
+
+export const hashToken = (token: string) =>
+  crypto.createHash('sha256').update(token).digest('hex')

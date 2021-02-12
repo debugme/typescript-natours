@@ -2,6 +2,7 @@ import mongoose, { Document } from 'mongoose'
 import validator from 'validator'
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
+import { hashToken } from '../utilities/utilities'
 
 export interface UserDocument extends Document {
   name: string
@@ -14,6 +15,7 @@ export interface UserDocument extends Document {
   passwordResetExpires?: Date
   role: String
   isCorrectPassword: (password: string) => Promise<boolean>
+  isPasswordUpdated: (tokenCreated: number) => boolean
   changedPassword: (timestamp: number) => boolean
   setPasswordResetFields: () => string
   resetPassword: (password: string, passwordConfirm: string) => void
@@ -101,13 +103,8 @@ UserSchema.methods.isPasswordUpdated = function (tokenCreated: number) {
 UserSchema.methods.setPasswordResetFields = function () {
   const expiryDate = new Date(Date.now() + 10 * 60 * 1000)
   const resetToken = crypto.randomBytes(32).toString('hex')
-
   this.passwordResetExpires = expiryDate
-  this.passwordResetToken = crypto
-    .createHash('sha256')
-    .update(resetToken)
-    .digest('hex')
-
+  this.passwordResetToken = hashToken(resetToken)
   return resetToken
 }
 
