@@ -26,8 +26,7 @@ const getTour = tryCatch(async (request, response, next) => {
   if (!tour) {
     const message = `could not find tour with id ${id}`
     const statusCode = StatusCodes.NOT_FOUND
-    const serverError = new ServerError(message, statusCode)
-    return next(serverError)
+    throw new ServerError(message, statusCode)
   }
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { tour } }
@@ -66,8 +65,7 @@ const updateTour = tryCatch(async (request, response, next) => {
   if (!tour) {
     const message = 'could not find tour with id ${id}'
     const statusCode = StatusCodes.NOT_FOUND
-    const serverError = new ServerError(message, statusCode)
-    return next(serverError)
+    throw new ServerError(message, statusCode)
   }
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { tour } }
@@ -82,8 +80,7 @@ const deleteTour = tryCatch(async (request, response, next) => {
   if (!tour) {
     const message = 'could not find tour with id ${id}'
     const statusCode = StatusCodes.NOT_FOUND
-    const serverError = new ServerError(message, statusCode)
-    return next(serverError)
+    throw new ServerError(message, statusCode)
   }
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { id } }

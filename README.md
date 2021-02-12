@@ -1,6 +1,5 @@
 ## TODO
 
-• in some controller methods you pass errors to next(); in others you throw an error. Update the code to use the latter approach consistently.
 • add instructions to start up a local mongodb instance in docker for development
 • add instructions to connect to mongodb instance in the cloud for production
 • allow checking against a list of roles rather than a single role
