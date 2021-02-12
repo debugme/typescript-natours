@@ -4,8 +4,6 @@
 • add instructions to start up a local mongodb instance in docker for development
 • add instructions to connect to mongodb instance in the cloud for production
 • allow checking against a list of roles rather than a single role
-• pass environment into server and database instead of variables
-• pass environment into routers and then into controllers rather than importing them each time
 • use the words "accessToken" and "resetToken" instead of just token to prevent ambiguity
 
 # We follow a fat model, thin controller architecture i.e. we want as much business logic to go into the models and as little as possible into the controllers.

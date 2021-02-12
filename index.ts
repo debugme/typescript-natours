@@ -1,21 +1,22 @@
 import { Server } from './server/server'
 import { Database } from './database/database'
 import { Environment } from './environment/environment'
-import { tourRouter } from './routers/tour'
-import { userRouter } from './routers/user'
+import { buildTourRouter } from './routers/tour'
+import { buildUserRouter } from './routers/user'
 import { defaultRouter } from './controllers/default'
 import { errorHandler } from './controllers/error'
+import { Emailer } from './emailer/emailer'
 
 const environment = new Environment(process.env)
-const mongoVariables = environment.getMongoVariables()
-const expressVariables = environment.getExpressVariables()
 
-const database = new Database(mongoVariables)
+const emailer = new Emailer(environment)
+
+const database = new Database(environment)
 database.connect()
 
-const server = new Server(expressVariables)
-server.handleRoute('/api/v1/tours', tourRouter)
-server.handleRoute('/api/v1/users', userRouter)
+const server = new Server(environment)
+server.handleRoute('/api/v1/tours', buildTourRouter(environment))
+server.handleRoute('/api/v1/users', buildUserRouter(environment, emailer))
 server.handleRoute('*', defaultRouter)
 server.handleError(errorHandler)
 server.connect()

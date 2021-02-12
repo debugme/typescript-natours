@@ -1,6 +1,6 @@
 import { ErrorRequestHandler } from 'express'
 import { StatusCodes } from 'http-status-codes'
-import { StatusTexts } from '../utilities/utilities'
+import { StatusTexts } from '../utilities/controllerUtils'
 
 export const errorHandler: ErrorRequestHandler = (
   error: any,

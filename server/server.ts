@@ -2,18 +2,18 @@ import http from 'http'
 import morgan from 'morgan'
 import express, { ErrorRequestHandler, Express, Router } from 'express'
 
-import { ExpressVariables } from '../environment/environment'
+import { Environment, ExpressVariables } from '../environment/environment'
 
 export class Server {
   private httpServer?: http.Server
   private server: Express = express()
-
-  constructor(private variables: ExpressVariables) {
-    const { PWD } = this.variables
+  private variables: ExpressVariables
+  constructor(environment: Environment) {
+    this.variables = environment.getExpressVariables()
     this.server.use(morgan('dev'))
     this.server.use(express.json())
     this.server.use(express.urlencoded({ extended: true }))
-    this.server.use(express.static(`${PWD}/public`))
+    this.server.use(express.static(`${this.variables.PWD}/public`))
   }
 
   public handleRoute = (path: string, router: Router) => {

@@ -1,6 +1,6 @@
 import express from 'express'
 import { StatusCodes } from 'http-status-codes'
-import { ServerError } from '../utilities/utilities'
+import { ServerError } from '../utilities/controllerUtils'
 
 export const defaultRouter = express.Router()
 defaultRouter.all('', (request, response, next) => {

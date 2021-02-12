@@ -2,7 +2,7 @@ import mongoose, { Document } from 'mongoose'
 import validator from 'validator'
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
-import { hashToken } from '../utilities/utilities'
+import { hashToken } from '../utilities/tokenUtils'
 
 export interface UserDocument extends Document {
   name: string
