@@ -82,12 +82,13 @@ UserSchema.pre('save', async function (next) {
   next()
 })
 
-// UserSchema.pre('save', function (next) {
-//   if (!this.isModified('password')) return next()
-//   if (this.isNew) return next()
-//   this.passwordChangedAt = new Date(Date.now() - 1000) // hack incase token generated before document saved
-//   next()
-// })
+UserSchema.pre('save', function (next) {
+  if (!this.isModified('password')) return next()
+  if (this.isNew) return next()
+  // this.passwordChangedAt = new Date(Date.now() - 1000) // hack incase token generated before document saved
+  this.passwordChangedAt = new Date(Date.now())
+  next()
+})
 
 // Create a new instance method for documents in the users collection
 UserSchema.methods.isCorrectPassword = async function (password: string) {

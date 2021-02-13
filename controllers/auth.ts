@@ -11,7 +11,7 @@ import {
   hashResetToken,
   decodeAccessToken,
 } from '../utilities/tokenUtils'
-import { User } from '../models/user'
+import { User, UserDocument } from '../models/user'
 import { Environment } from '../environment/environment'
 import { Emailer } from '../emailer/emailer'
 
@@ -113,7 +113,6 @@ const validateForgotPassword = tryCatch(async (request, response, next) => {
   const user = await User.findOne({ email })
   if (!user) throw new ServerError('No user found with that email address')
   request.body.user = user
-  console.log('--> inside validateForgotPassword()....')
   next()
 })
 
@@ -179,6 +178,44 @@ const resetPassword = (environment: Environment) =>
     response.status(StatusCodes.OK).json(cargo)
   })
 
+const validateUpdatePassword = tryCatch(async (request, response, next) => {
+  const { id } = request.body.user
+  const { oldPassword, newPassword, newPasswordConfirm } = request.body
+  const user = await User.findById(id).select('+password')
+  if (!user) throw new ServerError('User does not exist')
+
+  const isCorrectPassword = await user.isCorrectPassword(oldPassword)
+  if (!isCorrectPassword)
+    throw new ServerError('Existing password is not correct')
+
+  if (!newPassword) throw new ServerError('Proposed password is missing')
+
+  if (!newPasswordConfirm)
+    throw new ServerError('Proposed password confirm is missing')
+
+  if (newPassword !== newPasswordConfirm)
+    throw new ServerError(
+      'Please make sure newPassword and newPasswordConfirm match'
+    )
+  next()
+})
+
+const updatePassword = (environment: Environment) =>
+  tryCatch(async (request, response) => {
+    const { id } = request.body.user
+    const { newPassword, newPasswordConfirm } = request.body
+
+    const user = (await User.findById(id).select('+password')) as UserDocument
+    user.password = newPassword
+    user.passwordConfirm = newPasswordConfirm
+    user.save()
+
+    const accessToken = buildAccessToken(environment, id)
+    const status = StatusTexts.SUCCESS
+    const cargo = { status, accessToken }
+    response.status(StatusCodes.OK).json(cargo)
+  })
+
 export const authController = {
   validateSignUp,
   signUp,
@@ -190,4 +227,6 @@ export const authController = {
   forgotPassword,
   validateResetPassword,
   resetPassword,
+  validateUpdatePassword,
+  updatePassword,
 }

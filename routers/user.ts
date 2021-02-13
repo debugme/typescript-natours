@@ -28,6 +28,12 @@ export const buildUserRouter = (environment: Environment, emailer: Emailer) => {
       authController.validateResetPassword,
       authController.resetPassword(environment)
     )
+    .patch(
+      '/update-password/',
+      authController.validateIsAuthenticated(environment),
+      authController.validateUpdatePassword,
+      authController.updatePassword(environment)
+    )
 
   router
     .route('/')

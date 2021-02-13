@@ -1,8 +1,9 @@
 ## TODO
 
-• add instructions to start up a local mongodb instance in docker for development
-• add instructions to connect to mongodb instance in the cloud for production
 • allow checking against a list of roles rather than a single role
+• use AJV schema validation for request JSON bodies
+• create swagger docs for each of your endpoints
+• pass refresh token in cookie in response header back to client
 
 # We follow a fat model, thin controller architecture i.e. we want as much business logic to go into the models and as little as possible into the controllers.
 
