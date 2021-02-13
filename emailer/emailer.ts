@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+
 import { EmailVariables, Environment } from '../environment/environment'
 
 export interface EmailOptions {
@@ -20,7 +21,6 @@ export class Emailer {
     const pass = this.variables.EMAIL_PASS
     const transporterOptions = { host, port, auth: { user, pass } }
     const transporter = nodemailer.createTransport(transporterOptions)
-    const result = await transporter.sendMail(emailOptions)
-    console.log('--> result is ', result)
+    await transporter.sendMail(emailOptions)
   }
 }
