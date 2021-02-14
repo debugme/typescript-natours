@@ -39,9 +39,9 @@ export interface EnvironmentVariables
     EmailVariables {}
 
 export class Environment {
-  private variables: EnvironmentVariables
+  private environment: EnvironmentVariables
   constructor(environment: NodeJS.ProcessEnv) {
-    this.variables = (environment as unknown) as EnvironmentVariables
+    this.environment = environment
     const { PWD, NODE_ENV } = this.getNodeVariables()
     const path = `${PWD}/environment/.${NODE_ENV}.env`
     dotenv.config({ path })
@@ -49,12 +49,12 @@ export class Environment {
 
   public getNodeVariables = (): NodeVariables => {
     const fields = ['NODE_ENV', 'PWD']
-    return pick(fields, this.variables)
+    return pick(fields, this.environment)
   }
 
   public getExpressVariables = (): ExpressVariables => {
     const fields = ['EXPRESS_PORT']
-    return pick(fields, this.variables)
+    return pick(fields, this.environment)
   }
 
   public getMongoVariables = (): MongoVariables => {
@@ -65,16 +65,16 @@ export class Environment {
       'MONGO_HOSTNAME',
       'MONGO_DATABASE',
     ]
-    return pick(fields, this.variables)
+    return pick(fields, this.environment)
   }
 
   public getJwtVariables = (): JwtVariables => {
     const fields = ['JWT_SECRET_KEY', 'JWT_EXPIRES_IN', 'COOKIE_EXPIRES_IN']
-    return pick(fields, this.variables)
+    return pick(fields, this.environment)
   }
 
   public getEmailVariables = (): EmailVariables => {
     const fields = ['EMAIL_HOST', 'EMAIL_PORT', 'EMAIL_USER', 'EMAIL_PASS']
-    return pick(fields, this.variables)
+    return pick(fields, this.environment)
   }
 }
