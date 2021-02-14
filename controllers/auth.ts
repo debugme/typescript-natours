@@ -49,7 +49,7 @@ const validateSignIn = tryCatch(async (request, response, next) => {
   const { email, password } = request.body
   if (!email) throw new ServerError('Please provide an e-mail')
   if (!password) throw new ServerError('Please provide a password')
-  const user = await User.findOne({ email }).select('+password')
+  const user = await User.findOne({ email })
   if (!user) throw new ServerError('Please provide known email')
   const isCorrectPassword = await user.isCorrectPassword(password)
   if (!isCorrectPassword)
@@ -64,7 +64,7 @@ const signIn = (environment: Environment) =>
     const accessToken = buildAccessToken(environment, user.id)
     response.cookie('accessToken', accessToken, buildCookieOptions(environment))
     const status = StatusTexts.SUCCESS
-    const cargo = { status, accessToken }
+    const cargo = { status, accessToken, data: { user } }
     response.status(StatusCodes.OK).json(cargo)
   })
 
@@ -87,7 +87,7 @@ const validateIsAuthenticated = (environment: Environment) =>
     if (!decoded)
       throw new ServerError('Access token has expired or been tampered with')
 
-    const user = await User.findById(decoded.id).select('+password')
+    const user = await User.findById(decoded.id).select('+password') // TODO: Do you reall need this ".select('+password')"
     if (!user) throw new ServerError('User does not exist')
     if (user.isStaleAccessToken(decoded.iat)) {
       throw new Error(

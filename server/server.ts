@@ -1,13 +1,17 @@
-import http from 'http'
+// @ts-expect-error
+import xssClean from 'xss-clean'
+import rateLimit from 'express-rate-limit'
+import helmet from 'helmet'
+import hpp from 'hpp'
+import mongoSanitize from 'express-mongo-sanitize'
 import morgan from 'morgan'
+import http from 'http'
 import express, {
   ErrorRequestHandler,
   Express,
   RequestHandler,
   Router,
 } from 'express'
-import rateLimit from 'express-rate-limit'
-import helmet from 'helmet'
 
 import {
   Environment,
@@ -29,18 +33,32 @@ export class Server {
   }
 
   private setUpMiddleware = () => {
-    const max = 2 // the number of requests allowed to be made within a window of time
+    const max = 100 // the number of requests allowed to be made within a window of time
     const windowMs = 60 * 60 * 1000 // a 1 hour window of time
     const message = 'Too many requests. Try again in an hour.'
     const rateLimiter = rateLimit({ max, windowMs, message })
     const limit = 1024 // only allow JSON request bodies <= 1kb
+    const jsonOptions = { limit }
+    const urlOptions = { extended: true, limit }
     const pathToStaticFiles = `${this.variables.PWD}/public`
+    const whitelist = [
+      'duration',
+      'ratingsQuantity',
+      'ratingsAverage',
+      'maxGroupSize',
+      'difficulty',
+      'price',
+    ]
+    const hppWhitelist = { whitelist }
 
     this.handleMiddleware(helmet())
     this.handleRequest('/api', rateLimiter)
     this.handleMiddleware(morgan('dev'))
-    this.handleMiddleware(express.json({ limit }))
-    this.handleMiddleware(express.urlencoded({ extended: true, limit }))
+    this.handleMiddleware(express.json(jsonOptions))
+    this.handleMiddleware(express.urlencoded(urlOptions))
+    this.handleMiddleware(mongoSanitize())
+    this.handleMiddleware(xssClean())
+    this.handleMiddleware(hpp(hppWhitelist))
     this.handleMiddleware(express.static(pathToStaticFiles))
   }
 
