@@ -5,8 +5,7 @@
 • use AJV schema validation for request JSON bodies
 • create swagger docs for each of your endpoints
 • pass refresh token in cookie in response header back to client
-• find a way to save request.$user rather than in request.body.$user if possible
-• remove accessToken from response and put into response header cookie only
+• amend code to send tokens (e.g. access token or refresh token) in httpOnly cookie in response header rather than as part of JSON response body
 
 # We follow a fat model, thin controller architecture i.e. we want as much business logic to go into the models and as little as possible into the controllers.
 
