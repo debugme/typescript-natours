@@ -1,6 +1,12 @@
 import http from 'http'
 import morgan from 'morgan'
-import express, { ErrorRequestHandler, Express, Router } from 'express'
+import express, {
+  ErrorRequestHandler,
+  Express,
+  RequestHandler,
+  Router,
+} from 'express'
+import rateLimit from 'express-rate-limit'
 
 import {
   Environment,
@@ -12,19 +18,33 @@ export class Server {
   private httpServer?: http.Server
   private server: Express = express()
   private variables: ExpressVariables & NodeVariables
+
   constructor(environment: Environment) {
     this.variables = {
       ...environment.getNodeVariables(),
       ...environment.getExpressVariables(),
     }
-    this.server.use(morgan('dev'))
-    this.server.use(express.json())
-    this.server.use(express.urlencoded({ extended: true }))
-    this.server.use(express.static(`${this.variables.PWD}/public`))
+    this.handleRequest('/api', this.buildRateLimiter())
+    this.handleMiddleware(morgan('dev'))
+    this.handleMiddleware(express.json())
+    this.handleMiddleware(express.urlencoded({ extended: true }))
+    this.handleMiddleware(express.static(`${this.variables.PWD}/public`))
   }
 
-  public handleRoute = (path: string, router: Router) => {
-    this.server.use(path, router)
+  private buildRateLimiter = () => {
+    const max = 2 // the number of requests allowed to be made within a window of time
+    const windowMs = 60 * 60 * 1000 // a 1 hour window of time
+    const message = 'Too many requests. Try again in an hour.'
+    const rateLimiter = rateLimit({ max, windowMs, message })
+    return rateLimiter
+  }
+
+  public handleMiddleware = (handler: RequestHandler) => {
+    this.server.use(handler)
+  }
+
+  public handleRequest = (path: string, handler: Router | RequestHandler) => {
+    this.server.use(path, handler)
   }
 
   public handleError = (handler: ErrorRequestHandler) => {

@@ -25,4 +25,19 @@ const decodeAccessToken = (accessToken: string, secretKey: string) => {
 const hashResetToken = (resetToken: string) =>
   crypto.createHash('sha256').update(resetToken).digest('hex')
 
-export { buildAccessToken, decodeAccessToken, hashResetToken }
+const buildCookieOptions = (environment: Environment) => {
+  const { NODE_ENV } = environment.getNodeVariables()
+  const { COOKIE_EXPIRES_IN } = environment.getJwtVariables()
+  const amountInMs = Number(COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000
+  const expires = new Date(Date.now() + amountInMs)
+  const secure = NODE_ENV === 'production'
+  const cookieOptions = { expires, secure, httpOnly: true }
+  return cookieOptions
+}
+
+export {
+  buildAccessToken,
+  decodeAccessToken,
+  hashResetToken,
+  buildCookieOptions,
+}

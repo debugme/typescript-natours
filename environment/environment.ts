@@ -21,6 +21,7 @@ export interface MongoVariables {
 export interface JwtVariables {
   JWT_SECRET_KEY: string
   JWT_EXPIRES_IN: string
+  COOKIE_EXPIRES_IN: string
 }
 
 export interface EmailVariables {
@@ -68,7 +69,7 @@ export class Environment {
   }
 
   public getJwtVariables = (): JwtVariables => {
-    const fields = ['JWT_SECRET_KEY', 'JWT_EXPIRES_IN']
+    const fields = ['JWT_SECRET_KEY', 'JWT_EXPIRES_IN', 'COOKIE_EXPIRES_IN']
     return pick(fields, this.variables)
   }
 

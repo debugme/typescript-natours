@@ -10,6 +10,7 @@ import {
   buildAccessToken,
   hashResetToken,
   decodeAccessToken,
+  buildCookieOptions,
 } from '../utilities/tokenUtils'
 import { User } from '../models/user'
 import { Environment } from '../environment/environment'
@@ -36,8 +37,9 @@ const validateSignUp = tryCatch(async (request, response, next) => {
 
 const signUp = (environment: Environment) =>
   tryCatch(async (request, response) => {
-    const { user } = request.body
+    const { $user: user } = request.body
     const accessToken = buildAccessToken(environment, user.id)
+    response.cookie('accessToken', accessToken, buildCookieOptions(environment))
     const status = StatusTexts.SUCCESS
     const cargo = { status, accessToken, data: { user } }
     response.status(StatusCodes.CREATED).json(cargo)
@@ -58,8 +60,9 @@ const validateSignIn = tryCatch(async (request, response, next) => {
 
 const signIn = (environment: Environment) =>
   tryCatch(async (request, response) => {
-    const user = request.body.$user
+    const { $user: user } = request.body
     const accessToken = buildAccessToken(environment, user.id)
+    response.cookie('accessToken', accessToken, buildCookieOptions(environment))
     const status = StatusTexts.SUCCESS
     const cargo = { status, accessToken }
     response.status(StatusCodes.OK).json(cargo)
@@ -173,6 +176,7 @@ const resetPassword = (environment: Environment) =>
     user.resetPassword(password, passwordConfirm)
     await user.save()
     const accessToken = buildAccessToken(environment, user.id)
+    response.cookie('accessToken', accessToken, buildCookieOptions(environment))
     const status = StatusTexts.SUCCESS
     const cargo = { status, accessToken }
     response.status(StatusCodes.OK).json(cargo)
@@ -197,12 +201,13 @@ const validateUpdatePassword = tryCatch(async (request, response, next) => {
 const updatePassword = (environment: Environment) =>
   tryCatch(async (request, response) => {
     const { newPassword, newPasswordConfirm } = request.body
-    const user = request.body.$user
+    const { $user: user } = request.body
     user.password = newPassword
     user.passwordConfirm = newPasswordConfirm
     user.save()
 
     const accessToken = buildAccessToken(environment, user.id)
+    response.cookie('accessToken', accessToken, buildCookieOptions(environment))
     const status = StatusTexts.SUCCESS
     const cargo = { status, accessToken }
     response.status(StatusCodes.OK).json(cargo)

@@ -15,9 +15,9 @@ const database = new Database(environment)
 database.connect()
 
 const server = new Server(environment)
-server.handleRoute('/api/v1/tours', buildTourRouter(environment))
-server.handleRoute('/api/v1/users', buildUserRouter(environment, emailer))
-server.handleRoute('*', defaultRouter)
+server.handleRequest('/api/v1/tours', buildTourRouter(environment))
+server.handleRequest('/api/v1/users', buildUserRouter(environment, emailer))
+server.handleRequest('*', defaultRouter)
 server.handleError(errorHandler)
 server.connect()
 
