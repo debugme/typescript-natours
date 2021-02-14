@@ -7,6 +7,7 @@ import express, {
   Router,
 } from 'express'
 import rateLimit from 'express-rate-limit'
+import helmet from 'helmet'
 
 import {
   Environment,
@@ -24,19 +25,23 @@ export class Server {
       ...environment.getNodeVariables(),
       ...environment.getExpressVariables(),
     }
-    this.handleRequest('/api', this.buildRateLimiter())
-    this.handleMiddleware(morgan('dev'))
-    this.handleMiddleware(express.json())
-    this.handleMiddleware(express.urlencoded({ extended: true }))
-    this.handleMiddleware(express.static(`${this.variables.PWD}/public`))
+    this.setUpMiddleware()
   }
 
-  private buildRateLimiter = () => {
+  private setUpMiddleware = () => {
     const max = 2 // the number of requests allowed to be made within a window of time
     const windowMs = 60 * 60 * 1000 // a 1 hour window of time
     const message = 'Too many requests. Try again in an hour.'
     const rateLimiter = rateLimit({ max, windowMs, message })
-    return rateLimiter
+    const limit = 1024 // only allow JSON request bodies <= 1kb
+    const pathToStaticFiles = `${this.variables.PWD}/public`
+
+    this.handleMiddleware(helmet())
+    this.handleRequest('/api', rateLimiter)
+    this.handleMiddleware(morgan('dev'))
+    this.handleMiddleware(express.json({ limit }))
+    this.handleMiddleware(express.urlencoded({ extended: true, limit }))
+    this.handleMiddleware(express.static(pathToStaticFiles))
   }
 
   public handleMiddleware = (handler: RequestHandler) => {
