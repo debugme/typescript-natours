@@ -29,10 +29,21 @@ export const buildUserRouter = (environment: Environment, emailer: Emailer) => {
       authController.resetPassword(environment)
     )
     .patch(
-      '/update-password/',
+      '/update-password',
       authController.validateIsAuthenticated(environment),
       authController.validateUpdatePassword,
       authController.updatePassword(environment)
+    )
+    .patch(
+      '/update-user',
+      authController.validateIsAuthenticated(environment),
+      authController.validateUpdateUser,
+      authController.updateUser
+    )
+    .delete(
+      '/delete-user',
+      authController.validateIsAuthenticated(environment),
+      authController.deleteUser
     )
 
   router

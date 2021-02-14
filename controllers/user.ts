@@ -43,7 +43,7 @@ const getAllUsers = tryCatch(async (request, response) => {
     .limit(limitCount)
 
   const status = StatusTexts.SUCCESS
-  const cargo = { status, data: { users } }
+  const cargo = { status, meta: { results: users.length }, data: { users } }
   response.status(StatusCodes.OK).json(cargo)
 })
 

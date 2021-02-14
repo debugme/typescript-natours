@@ -11,7 +11,7 @@ import {
   hashResetToken,
   decodeAccessToken,
 } from '../utilities/tokenUtils'
-import { User, UserDocument } from '../models/user'
+import { User } from '../models/user'
 import { Environment } from '../environment/environment'
 import { Emailer } from '../emailer/emailer'
 
@@ -27,7 +27,7 @@ const validateSignUp = tryCatch(async (request, response, next) => {
     ]
     const data = await User.create(pick(fields, request.body))
     const user = omit(['password'], data.toJSON())
-    request.body.user = user
+    request.body.$user = user
   } catch (error) {
     throw new ServerError(error.message)
   }
@@ -52,14 +52,14 @@ const validateSignIn = tryCatch(async (request, response, next) => {
   const isCorrectPassword = await user.isCorrectPassword(password)
   if (!isCorrectPassword)
     throw new ServerError('Please provide correct password')
-  request.body.user = user
+  request.body.$user = user
   next()
 })
 
 const signIn = (environment: Environment) =>
   tryCatch(async (request, response) => {
-    const userId = request.body.user.id
-    const accessToken = buildAccessToken(environment, userId)
+    const user = request.body.$user
+    const accessToken = buildAccessToken(environment, user.id)
     const status = StatusTexts.SUCCESS
     const cargo = { status, accessToken }
     response.status(StatusCodes.OK).json(cargo)
@@ -84,7 +84,7 @@ const validateIsAuthenticated = (environment: Environment) =>
     if (!decoded)
       throw new ServerError('Access token has expired or been tampered with')
 
-    const user = await User.findById(decoded.id)
+    const user = await User.findById(decoded.id).select('+password')
     if (!user) throw new ServerError('User does not exist')
     if (user.isStaleAccessToken(decoded.iat)) {
       throw new Error(
@@ -92,13 +92,13 @@ const validateIsAuthenticated = (environment: Environment) =>
       )
     }
 
-    request.body.user = user
+    request.body.$user = user
     next()
   })
 
 const validateIsAuthorised = (...roles: string[]) => {
   return tryCatch(async (request, response, next) => {
-    if (!roles.includes(request.body.user.role))
+    if (!roles.includes(request.body.$user.role))
       throw new ServerError(
         'User not allowed to perform this operation',
         StatusCodes.UNAUTHORIZED
@@ -112,7 +112,7 @@ const validateForgotPassword = tryCatch(async (request, response, next) => {
   if (!email) throw new ServerError('Please provide an email address')
   const user = await User.findOne({ email })
   if (!user) throw new ServerError('No user found with that email address')
-  request.body.user = user
+  request.body.$user = user
   next()
 })
 
@@ -136,7 +136,7 @@ const forgotPassword = (environment: Environment, emailer: Emailer) => {
   }
 
   return tryCatch(async (request, response) => {
-    const { user, email } = request.body
+    const { $user: user, email } = request.body
     try {
       const resetToken = user.setPasswordResetFields()
       await user.save({ validateBeforeSave: false })
@@ -163,13 +163,13 @@ const validateResetPassword = tryCatch(async (request, response, next) => {
   const user = await User.findOne(filters)
   if (!user)
     throw new ServerError('Password reset token is either invalid or expired')
-  request.body.user = user
+  request.body.$user = user
   next()
 })
 
 const resetPassword = (environment: Environment) =>
   tryCatch(async (request, response) => {
-    const { password, passwordConfirm, user } = request.body
+    const { password, passwordConfirm, $user: user } = request.body
     user.resetPassword(password, passwordConfirm)
     await user.save()
     const accessToken = buildAccessToken(environment, user.id)
@@ -179,20 +179,14 @@ const resetPassword = (environment: Environment) =>
   })
 
 const validateUpdatePassword = tryCatch(async (request, response, next) => {
-  const { id } = request.body.user
   const { oldPassword, newPassword, newPasswordConfirm } = request.body
-  const user = await User.findById(id).select('+password')
-  if (!user) throw new ServerError('User does not exist')
-
+  const user = request.body.$user
   const isCorrectPassword = await user.isCorrectPassword(oldPassword)
   if (!isCorrectPassword)
     throw new ServerError('Existing password is not correct')
-
   if (!newPassword) throw new ServerError('Proposed password is missing')
-
   if (!newPasswordConfirm)
     throw new ServerError('Proposed password confirm is missing')
-
   if (newPassword !== newPasswordConfirm)
     throw new ServerError(
       'Please make sure newPassword and newPasswordConfirm match'
@@ -202,19 +196,49 @@ const validateUpdatePassword = tryCatch(async (request, response, next) => {
 
 const updatePassword = (environment: Environment) =>
   tryCatch(async (request, response) => {
-    const { id } = request.body.user
     const { newPassword, newPasswordConfirm } = request.body
-
-    const user = (await User.findById(id).select('+password')) as UserDocument
+    const user = request.body.$user
     user.password = newPassword
     user.passwordConfirm = newPasswordConfirm
     user.save()
 
-    const accessToken = buildAccessToken(environment, id)
+    const accessToken = buildAccessToken(environment, user.id)
     const status = StatusTexts.SUCCESS
     const cargo = { status, accessToken }
     response.status(StatusCodes.OK).json(cargo)
   })
+
+const validateUpdateUser = tryCatch(async (request, response, next) => {
+  const { password, passwordConfirm } = request.body
+  if (password)
+    throw new ServerError(
+      'Please use PATCH api/v1/users/update-password to update password'
+    )
+  if (passwordConfirm)
+    throw new ServerError(
+      'Please use PATCH api/v1/users/update-password to update passwordConfirm'
+    )
+  next()
+})
+
+const updateUser = tryCatch(async (request, response) => {
+  const { $user, ...rest } = request.body
+  const fields = pick(['name', 'email'], rest)
+  const userId = $user.id
+  const options = { new: true, runValidators: true }
+  const user = await User.findByIdAndUpdate(userId, fields, options)
+  const status = StatusTexts.SUCCESS
+  const cargo = { status, data: { user } }
+  response.status(StatusCodes.OK).json(cargo)
+})
+
+const deleteUser = tryCatch(async (request, response) => {
+  const { $user } = request.body
+  const user = await User.findByIdAndUpdate($user.id, { isActive: false })
+  const status = StatusTexts.SUCCESS
+  const cargo = { status, data: { user } }
+  response.status(StatusCodes.OK).json(cargo)
+})
 
 export const authController = {
   validateSignUp,
@@ -229,4 +253,7 @@ export const authController = {
   resetPassword,
   validateUpdatePassword,
   updatePassword,
+  validateUpdateUser,
+  updateUser,
+  deleteUser,
 }

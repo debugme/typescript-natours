@@ -1,4 +1,4 @@
-import mongoose, { Document } from 'mongoose'
+import mongoose, { Document, Query } from 'mongoose'
 import validator from 'validator'
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
@@ -14,6 +14,7 @@ export interface UserDocument extends Document {
   passwordResetToken?: string
   passwordResetExpires?: Date
   role: String
+  isActive?: Boolean
   isCorrectPassword: (password: string) => Promise<boolean>
   isStaleAccessToken: (tokenCreated: number) => boolean
   changedPassword: (timestamp: number) => boolean
@@ -67,6 +68,11 @@ export const UserSchema = new mongoose.Schema<UserDocument>(
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
+    isActive: {
+      type: Boolean,
+      default: true,
+      select: false, // this is an internal field we do not want to expose in queries that indicates whether a user is deleted or not
+    },
   },
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 )
@@ -82,12 +88,18 @@ UserSchema.pre('save', async function (next) {
   next()
 })
 
+// [DOCUMENT MIDDLEWARE] - only runs on .save() and .create()
 UserSchema.pre('save', function (next) {
   if (!this.isModified('password')) return next()
   if (this.isNew) return next()
   // this.passwordChangedAt = new Date(Date.now() - 1000) // hack incase token generated before document saved
   this.passwordChangedAt = new Date(Date.now())
   next()
+})
+
+// [QUERY MIDDLEWARE] - find all users where isActive is not false
+UserSchema.pre<Query<UserDocument, UserDocument>>(/^find/, function () {
+  this.find({ isActive: { $ne: false } })
 })
 
 // Create a new instance method for documents in the users collection
