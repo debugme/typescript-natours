@@ -97,7 +97,7 @@ UserSchema.pre('save', function (next) {
   next()
 })
 
-// [QUERY MIDDLEWARE] - find all users where isActive is not false
+// [QUERY MIDDLEWARE] - before running any findXXX method, amend the filter to only include active users
 UserSchema.pre<Query<UserDocument, UserDocument>>(/^find/, function () {
   this.find({ isActive: { $ne: false } })
 })
@@ -107,12 +107,14 @@ UserSchema.methods.isCorrectPassword = async function (password: string) {
   return await bcrypt.compare(password, this.password)
 }
 
+// if the password has been changed since the access token was created, then the access token is stale and needs to be regenerated
 UserSchema.methods.isStaleAccessToken = function (tokenCreated: number) {
   if (!this.passwordChangedAt) return false
   const passwordChanged = this.passwordChangedAt.getTime() / 1000
   return passwordChanged > tokenCreated
 }
 
+// password is about to be reset to update appropriate fields
 UserSchema.methods.setPasswordResetFields = function () {
   const expiryDate = new Date(Date.now() + 10 * 60 * 1000)
   const resetToken = crypto.randomBytes(32).toString('hex')
@@ -121,6 +123,7 @@ UserSchema.methods.setPasswordResetFields = function () {
   return resetToken
 }
 
+// password has been reset so update appropriate fields
 UserSchema.methods.resetPassword = function (
   password: string,
   passwordConfirm: string
