@@ -2,11 +2,12 @@ import { Router } from 'express'
 
 import { authController } from '../controllers/authController'
 import { userController } from '../controllers/userController'
-import { Environment } from '../environment/environment'
-import { Emailer } from '../emailer/emailer'
+import { Services } from '../services'
 
-export const buildUserRouter = (environment: Environment, emailer: Emailer) => {
+export const buildUserRouter = (services: Services) => {
   const router = Router()
+  const { environment, emailer } = services
+
   router
     .post(
       '/signup',

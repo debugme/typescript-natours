@@ -1,14 +1,14 @@
 import mongoose from 'mongoose'
-import { Environment, MongoVariables } from '../environment/environment'
-// import { Tour } from '../models/tour'
+import { MongoVariables } from '../environment/environment'
+import { Services } from '../services'
 
 export class Database {
   private mongoUri: string
   private options: object
   private variables: MongoVariables
 
-  constructor(environment: Environment) {
-    this.variables = environment.getMongoVariables()
+  constructor(services: Services) {
+    this.variables = services.environment.getMongoVariables()
     this.mongoUri = this.getUri()
     this.options = this.getOptions()
   }

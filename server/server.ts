@@ -13,22 +13,19 @@ import express, {
   Router,
 } from 'express'
 
-import {
-  Environment,
-  ExpressVariables,
-  NodeVariables,
-} from '../environment/environment'
+import { ExpressVariables, NodeVariables } from '../environment/environment'
+import { Services } from '../services'
 
 export class Server {
   private httpServer?: http.Server
   private server: Express = express()
-  private variables: ExpressVariables & NodeVariables
+  private expressVariables: ExpressVariables
+  private nodeVariables: NodeVariables
 
-  constructor(environment: Environment) {
-    this.variables = {
-      ...environment.getNodeVariables(),
-      ...environment.getExpressVariables(),
-    }
+  constructor(services: Services) {
+    const { environment } = services
+    this.nodeVariables = environment.getNodeVariables()
+    this.expressVariables = environment.getExpressVariables()
     this.setUpMiddleware()
   }
 
@@ -40,7 +37,7 @@ export class Server {
     const limit = '10kb' // only allow JSON request bodies <= 10kb
     const jsonOptions = { limit }
     const urlOptions = { extended: true, limit }
-    const pathToStaticFiles = `${this.variables.PWD}/public`
+    const pathToStaticFiles = `${this.nodeVariables.PWD}/public`
     const whitelist = [
       'duration',
       'ratingsQuantity',
@@ -75,7 +72,7 @@ export class Server {
   }
 
   public connect = () => {
-    const { EXPRESS_PORT } = this.variables
+    const { EXPRESS_PORT } = this.expressVariables
     const listener = () => console.log('[server] connected...')
     this.httpServer = this.server.listen(EXPRESS_PORT, listener)
   }

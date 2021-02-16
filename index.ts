@@ -1,24 +1,21 @@
 import { Server } from './server/server'
 import { Database } from './database/database'
-import { Environment } from './environment/environment'
 import { buildTourRouter } from './routers/tourRouter'
 import { buildUserRouter } from './routers/userRouter'
 import { defaultRouter } from './controllers/defaultController'
 import { errorHandler } from './controllers/errorHandler'
-import { Emailer } from './emailer/emailer'
 import { buildReviewRouter } from './routers/reviewRouter'
+import { Services } from './services'
 
-const environment = new Environment(process.env)
+const services = new Services(process)
 
-const emailer = new Emailer(environment)
-
-const database = new Database(environment)
+const database = new Database(services)
 database.connect()
 
-const server = new Server(environment)
-server.handleRequest('/api/v1/tours', buildTourRouter(environment))
-server.handleRequest('/api/v1/users', buildUserRouter(environment, emailer))
-server.handleRequest('/api/v1/reviews', buildReviewRouter(environment))
+const server = new Server(services)
+server.handleRequest('/api/v1/tours', buildTourRouter(services))
+server.handleRequest('/api/v1/users', buildUserRouter(services))
+server.handleRequest('/api/v1/reviews', buildReviewRouter(services))
 server.handleRequest('*', defaultRouter)
 server.handleError(errorHandler)
 server.connect()

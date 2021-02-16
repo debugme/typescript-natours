@@ -1,9 +1,9 @@
 import { Router } from 'express'
 
 import { reviewController } from '../controllers/reviewController'
-import { Environment } from '../environment/environment'
+import { Services } from '../services'
 
-export const buildReviewRouter = (environment: Environment) => {
+export const buildReviewRouter = (services: Services) => {
   const router = Router()
   router.route('/').get(reviewController.getAllReviews)
   return router

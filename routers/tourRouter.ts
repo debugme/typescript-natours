@@ -1,11 +1,12 @@
 import { Router } from 'express'
-import { Environment } from '../environment/environment'
 import { tourController } from '../controllers/tourController'
 import { authController } from '../controllers/authController'
 import { reviewController } from '../controllers/reviewController'
+import { Services } from '../services'
 
-export const buildTourRouter = (environment: Environment) => {
+export const buildTourRouter = (services: Services) => {
   const router = Router()
+  const { environment } = services
 
   router
     .route('/:tourId/reviews')
