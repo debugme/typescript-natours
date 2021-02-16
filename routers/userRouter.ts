@@ -5,10 +5,10 @@ import { userController } from '../controllers/userController'
 import { Services } from '../services'
 
 export const buildUserRouter = (services: Services) => {
-  const router = Router()
+  const userRouter = Router()
   const { environment, emailer } = services
 
-  router
+  userRouter
     .post(
       '/signup',
       authController.validateSignUp,
@@ -47,15 +47,15 @@ export const buildUserRouter = (services: Services) => {
       authController.deleteUser
     )
 
-  router
+  userRouter
     .route('/')
     .post(userController.createUser)
     .get(userController.getAllUsers)
 
-  router
+  userRouter
     .route('/:userId')
     .get(userController.getUser)
     .patch(userController.updateUser)
     .delete(userController.deleteUser)
-  return router
+  return userRouter
 }

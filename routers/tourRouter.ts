@@ -1,30 +1,21 @@
 import { Router } from 'express'
+
+import { Services } from '../services'
 import { tourController } from '../controllers/tourController'
 import { authController } from '../controllers/authController'
-import { reviewController } from '../controllers/reviewController'
-import { Services } from '../services'
+import { buildReviewRouter } from '../routers/reviewRouter'
 
 export const buildTourRouter = (services: Services) => {
-  const router = Router()
+  const tourRouter = Router()
   const { environment } = services
+  const reviewRouter = buildReviewRouter(services)
 
-  router
-    .route('/:tourId/reviews')
-    .post(
-      authController.validateIsAuthenticated(environment),
-      authController.validateIsAuthorised('user'),
-      reviewController.validateCreateReview,
-      reviewController.createReview
-    )
-    .get(reviewController.getAllReviews)
+  tourRouter.use('/:tourId/reviews', reviewRouter)
 
-  router.route(':tourId/reviews/:reviewId').get(reviewController.getReview)
+  tourRouter.route('/stats').get(tourController.getTourStats)
+  tourRouter.route('/monthly-plan/:year').get(tourController.getMonthlyPlan)
 
-  router.route('/stats').get(tourController.getTourStats)
-
-  router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan)
-
-  router
+  tourRouter
     .route('/:tourId')
     .get(tourController.getTour)
     .patch(tourController.updateTour)
@@ -34,12 +25,12 @@ export const buildTourRouter = (services: Services) => {
       tourController.deleteTour
     )
 
-  router
+  tourRouter
     .route('/')
     .get(
       authController.validateIsAuthenticated(environment),
       tourController.getAllTours
     )
     .post(tourController.createTour)
-  return router
+  return tourRouter
 }
