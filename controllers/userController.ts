@@ -8,7 +8,7 @@ import {
   tryCatch,
 } from '../utilities/controllerUtils'
 
-import { User, userFields } from '../models/user'
+import { UserModel, userFields } from '../models/userModel'
 import { StatusCodes } from 'http-status-codes'
 
 const createUser = tryCatch(async (request, response) => {
@@ -33,10 +33,10 @@ const getAllUsers = tryCatch(async (request, response) => {
   const skipCount = getSkipCount(query)
   const limitCount = getLimitCount(query)
 
-  const documentCount = await User.countDocuments()
+  const documentCount = await UserModel.countDocuments()
   if (skipCount >= documentCount) throw new Error('This page does not exist!')
 
-  const users = await User.find(filters)
+  const users = await UserModel.find(filters)
     .select(projection)
     .sort(sortFields)
     .skip(skipCount)

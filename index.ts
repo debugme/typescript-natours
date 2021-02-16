@@ -1,12 +1,12 @@
 import { Server } from './server/server'
 import { Database } from './database/database'
 import { Environment } from './environment/environment'
-import { buildTourRouter } from './routers/tour'
-import { buildUserRouter } from './routers/user'
-import { defaultRouter } from './controllers/default'
-import { errorHandler } from './controllers/error'
+import { buildTourRouter } from './routers/tourRouter'
+import { buildUserRouter } from './routers/userRouter'
+import { defaultRouter } from './controllers/defaultController'
+import { errorHandler } from './controllers/errorHandler'
 import { Emailer } from './emailer/emailer'
-import { buildReviewRouter } from './routers/review'
+import { buildReviewRouter } from './routers/reviewRouter'
 
 const environment = new Environment(process.env)
 

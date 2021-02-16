@@ -12,7 +12,7 @@ import {
   decodeAccessToken,
   buildCookieOptions,
 } from '../utilities/tokenUtils'
-import { User } from '../models/user'
+import { UserModel } from '../models/userModel'
 import { Environment } from '../environment/environment'
 import { Emailer } from '../emailer/emailer'
 
@@ -26,7 +26,7 @@ const validateSignUp = tryCatch(async (request, response, next) => {
       'role',
       'photo',
     ]
-    const user = await User.create(pick(fields, request.body))
+    const user = await UserModel.create(pick(fields, request.body))
     request.context = { user }
   } catch (error) {
     throw new ServerError(error.message)
@@ -48,7 +48,7 @@ const validateSignIn = tryCatch(async (request, response, next) => {
   const { email, password } = request.body
   if (!email) throw new ServerError('Please provide an e-mail')
   if (!password) throw new ServerError('Please provide a password')
-  const user = await User.findOne({ email }).select('+password')
+  const user = await UserModel.findOne({ email }).select('+password')
   if (!user) throw new ServerError('Please provide known email')
   const isCorrectPassword = await user.isCorrectPassword(password)
   if (!isCorrectPassword)
@@ -86,7 +86,7 @@ const validateIsAuthenticated = (environment: Environment) =>
     if (!decoded)
       throw new ServerError('Access token has expired or been tampered with')
 
-    const user = await User.findById(decoded.id).select('+password')
+    const user = await UserModel.findById(decoded.id).select('+password')
     if (!user) throw new ServerError('User does not exist')
     if (user.isStaleAccessToken(decoded.iat)) {
       throw new Error(
@@ -113,7 +113,7 @@ const validateIsAuthorised = (...roles: string[]) => {
 const validateForgotPassword = tryCatch(async (request, response, next) => {
   const { email } = request.body
   if (!email) throw new ServerError('Please provide an email address')
-  const user = await User.findOne({ email })
+  const user = await UserModel.findOne({ email })
   if (!user) throw new ServerError('No user found with that email address')
   request.context = { user }
   next()
@@ -164,7 +164,7 @@ const validateResetPassword = tryCatch(async (request, response, next) => {
   const passwordResetToken = hashResetToken(resetToken)
   const passwordResetExpires = { $gt: new Date() }
   const filters = { passwordResetToken, passwordResetExpires }
-  const user = await User.findOne(filters)
+  const user = await UserModel.findOne(filters)
   if (!user)
     throw new ServerError('Password reset token is either invalid or expired')
   request.context = { user }
@@ -233,7 +233,7 @@ const updateUser = tryCatch(async (request, response) => {
   const fields = pick(['name', 'email'], body)
   const userId = request.context.user.id
   const options = { new: true, runValidators: true }
-  const user = await User.findByIdAndUpdate(userId, fields, options)
+  const user = await UserModel.findByIdAndUpdate(userId, fields, options)
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { user } }
   response.status(StatusCodes.OK).json(cargo)
@@ -242,7 +242,7 @@ const updateUser = tryCatch(async (request, response) => {
 const deleteUser = tryCatch(async (request, response) => {
   const userId = request.context.user.id
   const filters = { isActive: false }
-  const user = await User.findByIdAndUpdate(userId, filters)
+  const user = await UserModel.findByIdAndUpdate(userId, filters)
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { user } }
   response.status(StatusCodes.OK).json(cargo)

@@ -1,7 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
 import { pick } from 'ramda'
-import { Review, ReviewSchema } from '../models/review'
-import { Tour } from '../models/tour'
+import { ReviewModel, ReviewSchema } from '../models/reviewModel'
+import { TourModel } from '../models/tourModel'
 import {
   ServerError,
   StatusTexts,
@@ -9,7 +9,7 @@ import {
 } from '../utilities/controllerUtils'
 
 const getAllReviews = tryCatch(async (request, response) => {
-  const reviews = await Review.find()
+  const reviews = await ReviewModel.find()
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { reviews } }
   response.status(StatusCodes.OK).json(cargo)
@@ -18,7 +18,7 @@ const getAllReviews = tryCatch(async (request, response) => {
 const validateCreateReview = tryCatch(async (request, response, next) => {
   const { body, params } = request
   const { tourId } = params
-  const tour = await Tour.findById(tourId)
+  const tour = await TourModel.findById(tourId)
   const fields = Object.keys(ReviewSchema.obj)
   const { review, rating } = pick(fields, body)
   if (!review) throw new ServerError('Please provide a review')
@@ -34,7 +34,7 @@ const createReview = tryCatch(async (request, response) => {
     review: request.body.review,
     rating: request.body.rating,
   }
-  const review = await Review.create(payload)
+  const review = await ReviewModel.create(payload)
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { review } }
   response.status(StatusCodes.CREATED).json(cargo)
@@ -42,16 +42,16 @@ const createReview = tryCatch(async (request, response) => {
 
 const validateGetReview = tryCatch(async (request, response, next) => {
   const { tourId, reviewId } = request.params
-  const tour = await Tour.findById(tourId)
+  const tour = await TourModel.findById(tourId)
   if (!tour) throw new ServerError('Please provide a valid tourId')
-  const review = Review.findById(reviewId)
+  const review = ReviewModel.findById(reviewId)
   if (!review) throw new ServerError('Please provide a valid reviewId')
   next()
 })
 
 const getReview = tryCatch(async (request, response) => {
   const { reviewId } = request.params
-  const review = Review.findById(reviewId)
+  const review = ReviewModel.findById(reviewId)
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { review } }
   response.status(StatusCodes.CREATED).json(cargo)

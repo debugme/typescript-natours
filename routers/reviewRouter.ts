@@ -1,6 +1,6 @@
 import { Router } from 'express'
 
-import { reviewController } from '../controllers/review'
+import { reviewController } from '../controllers/reviewController'
 import { Environment } from '../environment/environment'
 
 export const buildReviewRouter = (environment: Environment) => {

@@ -1,5 +1,5 @@
 import { StatusCodes } from 'http-status-codes'
-import { Tour, TourSchema } from '../models/tour'
+import { TourModel, TourSchema } from '../models/tourModel'
 import {
   getFilters,
   getLimitCount,
@@ -12,7 +12,7 @@ import {
 } from '../utilities/controllerUtils'
 
 const createTour = tryCatch(async (request, response) => {
-  const tour = await Tour.create(request.body)
+  const tour = await TourModel.create(request.body)
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { tour } }
   response.status(StatusCodes.CREATED).json(cargo)
@@ -22,7 +22,7 @@ const getTour = tryCatch(async (request, response) => {
   const {
     params: { tourId },
   } = request
-  const tour = await Tour.findById(tourId).populate('reviews')
+  const tour = await TourModel.findById(tourId).populate('reviews')
   if (!tour) {
     const message = `could not find tour with id ${tourId} `
     const statusCode = StatusCodes.NOT_FOUND
@@ -42,10 +42,10 @@ const getAllTours = tryCatch(async (request, response) => {
   const skipCount = getSkipCount(query)
   const limitCount = getLimitCount(query)
 
-  const documentCount = await Tour.countDocuments()
+  const documentCount = await TourModel.countDocuments()
   if (skipCount >= documentCount) throw new Error('This page does not exist!')
 
-  const tours = await Tour.find(filters)
+  const tours = await TourModel.find(filters)
     .select(projection)
     .sort(sortFields)
     .skip(skipCount)
@@ -62,7 +62,7 @@ const updateTour = tryCatch(async (request, response) => {
     params: { id },
   } = request
   const options = { new: true, runValidators: true }
-  const tour = await Tour.findByIdAndUpdate(id, body, options)
+  const tour = await TourModel.findByIdAndUpdate(id, body, options)
   if (!tour) {
     const message = 'could not find tour with id ${id}'
     const statusCode = StatusCodes.NOT_FOUND
@@ -77,7 +77,7 @@ const deleteTour = tryCatch(async (request, response) => {
   const {
     params: { id },
   } = request
-  const tour = await Tour.findByIdAndDelete(id)
+  const tour = await TourModel.findByIdAndDelete(id)
   if (!tour) {
     const message = 'could not find tour with id ${id}'
     const statusCode = StatusCodes.NOT_FOUND
@@ -109,7 +109,7 @@ const getTourStats = tryCatch(async (request, response) => {
     //   $match: { _id: { $ne: 'EASY' } },
     // },
   ]
-  const stats = await Tour.aggregate(pipeline)
+  const stats = await TourModel.aggregate(pipeline)
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { stats } }
   response.status(StatusCodes.OK).json(cargo)
@@ -159,7 +159,7 @@ const getMonthlyPlan = tryCatch(async (request, response) => {
       $limit: 12,
     },
   ]
-  const plan = await Tour.aggregate(pipeline)
+  const plan = await TourModel.aggregate(pipeline)
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { plan } }
   response.status(StatusCodes.OK).json(cargo)

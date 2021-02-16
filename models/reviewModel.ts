@@ -1,5 +1,5 @@
 import mongoose, { Document, Query } from 'mongoose'
-import { User } from './user'
+import { UserModel } from './userModel'
 
 export interface ReviewDocument extends Document {
   review: string
@@ -32,7 +32,7 @@ export const ReviewSchema = new mongoose.Schema<ReviewDocument>(
     },
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: User.modelName,
+      ref: UserModel.modelName,
       required: [true, 'Error - A review must have a user'],
     },
   },
@@ -51,4 +51,4 @@ ReviewSchema.pre<Query<ReviewDocument, ReviewDocument>>(
   }
 )
 
-export const Review = mongoose.model('Review', ReviewSchema)
+export const ReviewModel = mongoose.model('Review', ReviewSchema)

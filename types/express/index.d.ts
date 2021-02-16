@@ -1,4 +1,4 @@
-import { UserDocument } from '../../models/user'
+import { UserDocument } from '../../models/userModel'
 import { EnvironmentVariables } from '../../environment/environment'
 
 declare global {

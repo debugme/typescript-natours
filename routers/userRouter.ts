@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
-import { authController } from '../controllers/auth'
-import { userController } from '../controllers/user'
+import { authController } from '../controllers/authController'
+import { userController } from '../controllers/userController'
 import { Environment } from '../environment/environment'
 import { Emailer } from '../emailer/emailer'
 

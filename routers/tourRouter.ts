@@ -1,8 +1,8 @@
 import { Router } from 'express'
 import { Environment } from '../environment/environment'
-import { tourController } from '../controllers/tour'
-import { authController } from '../controllers/auth'
-import { reviewController } from '../controllers/review'
+import { tourController } from '../controllers/tourController'
+import { authController } from '../controllers/authController'
+import { reviewController } from '../controllers/reviewController'
 
 export const buildTourRouter = (environment: Environment) => {
   const router = Router()

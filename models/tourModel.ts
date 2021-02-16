@@ -1,7 +1,7 @@
 import mongoose, { Aggregate, Document, Query } from 'mongoose'
 import slugify from 'slugify'
-import { Review, ReviewSchema } from './review'
-import { User } from './user'
+import { ReviewModel, ReviewSchema } from './reviewModel'
+import { UserModel } from './userModel'
 
 export interface TourDocument extends Document {
   name: string
@@ -140,7 +140,7 @@ export const TourSchema = new mongoose.Schema<TourDocument>(
     guides: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: User.modelName,
+        ref: UserModel.modelName,
       },
     ],
   },
@@ -204,4 +204,4 @@ TourSchema.pre('aggregate', function (this: Aggregate<TourDocument>, next) {
   next(null)
 })
 
-export const Tour = mongoose.model('Tour', TourSchema)
+export const TourModel = mongoose.model('Tour', TourSchema)

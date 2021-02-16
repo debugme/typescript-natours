@@ -137,4 +137,4 @@ UserSchema.methods.resetPassword = function (
 
 export const userFields = Object.keys(UserSchema.obj)
 
-export const User = mongoose.model<UserDocument>('User', UserSchema)
+export const UserModel = mongoose.model<UserDocument>('User', UserSchema)
