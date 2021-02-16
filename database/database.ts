@@ -1,5 +1,6 @@
 import mongoose from 'mongoose'
 import { Environment, MongoVariables } from '../environment/environment'
+// import { Tour } from '../models/tour'
 
 export class Database {
   private mongoUri: string
@@ -14,6 +15,14 @@ export class Database {
 
   public connect = async () => {
     await mongoose.connect(this.mongoUri, this.options)
+    // .then(async (connection) => import('fs/promises'))
+    // .then((fs) => fs.readFile(`dev-data/data/tours.json`, 'utf-8'))
+    // .then((data) => JSON.parse(data))
+    // .then((tours) => {
+    //   Tour.deleteMany()
+    //   Tour.create(tours)
+    // })
+    // .catch((error) => console.error(error))
     console.log('[database] connected...')
   }
 

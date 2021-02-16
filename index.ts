@@ -6,6 +6,7 @@ import { buildUserRouter } from './routers/user'
 import { defaultRouter } from './controllers/default'
 import { errorHandler } from './controllers/error'
 import { Emailer } from './emailer/emailer'
+import { buildReviewRouter } from './routers/review'
 
 const environment = new Environment(process.env)
 
@@ -17,6 +18,7 @@ database.connect()
 const server = new Server(environment)
 server.handleRequest('/api/v1/tours', buildTourRouter(environment))
 server.handleRequest('/api/v1/users', buildUserRouter(environment, emailer))
+server.handleRequest('/api/v1/reviews', buildReviewRouter(environment))
 server.handleRequest('*', defaultRouter)
 server.handleError(errorHandler)
 server.connect()

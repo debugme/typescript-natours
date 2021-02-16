@@ -1,5 +1,6 @@
 import mongoose, { Aggregate, Document, Query } from 'mongoose'
 import slugify from 'slugify'
+import { User } from './user'
 
 export interface TourDocument extends Document {
   name: string
@@ -104,6 +105,43 @@ export const TourSchema = new mongoose.Schema<TourDocument>(
     startDates: [Date],
     slug: { type: String, trim: true },
     isSecretTour: { type: Boolean, default: false },
+    startLocation: {
+      type: {
+        type: String,
+        default: 'Point',
+        enum: {
+          values: ['Point'],
+          message: 'type can only be "Point" ',
+        },
+      },
+      coordinates: [Number],
+      address: String,
+      description: String,
+    },
+    // An example of how to refer to embed documents into this document
+    locations: [
+      {
+        type: {
+          type: String,
+          default: 'Point',
+          enum: {
+            values: ['Point'],
+            message: 'type can only be "Point" ',
+          },
+        },
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
+    ],
+    // An example of how to refer to documents in other collections
+    guides: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: User.modelName,
+      },
+    ],
   },
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 )
@@ -121,17 +159,35 @@ TourSchema.virtual('durationInWeeks').get(function (this: TourDocument) {
 // Note: Inside the function callback, this refers to the document being created/saved
 TourSchema.pre<TourDocument>('save', function (next) {
   this.slug = slugify(this.name, { lower: true })
-  next()
+  next(null)
 })
+
+// SHOWS HOW TO EMBED USERS INTO A TOUR
+// TourSchema.pre<TourDocument>('save', async function (next) {
+//   const guidesList = this.guides.map(async (userId: object) => {
+//     const user = await User.findById(userId)
+//     if (!user) throw Error(`Could not find user with id ${userId}`)
+//     return user
+//   })
+//   this.guides = await Promise.all(guidesList)
+//   next(null)
+// })
 
 // [QUERY MIDDLEWARE] - filter out all tours which are secret ones
 // Note: Inside the function callback, this refers to a query
-TourSchema.pre<Query<TourDocument, TourDocument>>(
-  /^find/,
-  function (this: Query<TourDocument, TourDocument>) {
-    this.find({ isSecretTour: { $ne: true } })
-  }
-)
+TourSchema.pre<Query<TourDocument, TourDocument>>(/^find/, function (next) {
+  this.find({ isSecretTour: { $ne: true } })
+  next(null)
+})
+
+// [QUERY MIDDLEWARE] - filter out __v field from all users under guides field
+TourSchema.pre<Query<TourDocument, TourDocument>>(/^find/, function (next) {
+  this.populate({
+    path: 'guides',
+    select: '-__v',
+  })
+  next(null)
+})
 
 // [AGGREGATE MIDDLEWARE] - filter out all tours which are secret ones
 // Note: Inside the function callback, this refers to the aggregate object
@@ -139,7 +195,5 @@ TourSchema.pre('aggregate', function (this: Aggregate<TourDocument>, next) {
   this.pipeline().unshift({ $match: { isSecretTour: { $ne: true } } })
   next(null)
 })
-
-export const tourFields = Object.keys(TourSchema.obj)
 
 export const Tour = mongoose.model('Tour', TourSchema)

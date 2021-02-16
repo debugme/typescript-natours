@@ -1,12 +1,14 @@
-import { ErrorRequestHandler } from 'express'
+import { ErrorRequestHandler, Request, Response, NextFunction } from 'express'
 import { StatusCodes } from 'http-status-codes'
+
 import { StatusTexts } from '../utilities/controllerUtils'
 
+type ErrorType = Error & { statusCode?: number; status?: string }
+
 export const errorHandler: ErrorRequestHandler = (
-  error: any,
-  request: any,
-  response: any,
-  next: any
+  error: ErrorType,
+  request: Request,
+  response: Response
 ) => {
   error.statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR
   error.status = error.status || StatusTexts.ERROR

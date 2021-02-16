@@ -1,5 +1,6 @@
 import express from 'express'
 import { StatusCodes } from 'http-status-codes'
+
 import { ServerError, tryCatch } from '../utilities/controllerUtils'
 
 export const defaultRouter = express.Router()

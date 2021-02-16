@@ -1,5 +1,5 @@
 import { StatusCodes } from 'http-status-codes'
-import { Tour, tourFields } from '../models/tour'
+import { Tour, TourSchema } from '../models/tour'
 import {
   getFilters,
   getLimitCount,
@@ -18,13 +18,13 @@ const createTour = tryCatch(async (request, response) => {
   response.status(StatusCodes.CREATED).json(cargo)
 })
 
-const getTour = tryCatch(async (request, response, next) => {
+const getTour = tryCatch(async (request, response) => {
   const {
     params: { id },
   } = request
   const tour = await Tour.findById(id)
   if (!tour) {
-    const message = `could not find tour with id ${id}`
+    const message = `could not find tour with id ${id} `
     const statusCode = StatusCodes.NOT_FOUND
     throw new ServerError(message, statusCode)
   }
@@ -35,6 +35,7 @@ const getTour = tryCatch(async (request, response, next) => {
 
 const getAllTours = tryCatch(async (request, response) => {
   const { query } = request
+  const tourFields = Object.keys(TourSchema.obj)
   const filters = getFilters(query, tourFields)
   const projection = getProjection(query)
   const sortFields = getSortFields(query)
@@ -55,7 +56,7 @@ const getAllTours = tryCatch(async (request, response) => {
   response.status(StatusCodes.OK).json(cargo)
 })
 
-const updateTour = tryCatch(async (request, response, next) => {
+const updateTour = tryCatch(async (request, response) => {
   const {
     body,
     params: { id },
@@ -72,7 +73,7 @@ const updateTour = tryCatch(async (request, response, next) => {
   response.status(StatusCodes.OK).json(cargo)
 })
 
-const deleteTour = tryCatch(async (request, response, next) => {
+const deleteTour = tryCatch(async (request, response) => {
   const {
     params: { id },
   } = request

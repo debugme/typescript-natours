@@ -4,7 +4,7 @@ import { EnvironmentVariables } from '../../environment/environment'
 declare global {
   namespace Express {
     interface Request {
-      // Extend Express.Request to have a field called user of type UserDocument
+      // Extend Express.Request to reference the currently logged in user
       user: UserDocument
     }
   }

@@ -37,7 +37,7 @@ export class Server {
     const windowMs = 60 * 60 * 1000 // a 1 hour window of time
     const message = 'Too many requests. Try again in an hour.'
     const rateLimiter = rateLimit({ max, windowMs, message })
-    const limit = 1024 // only allow JSON request bodies <= 1kb
+    const limit = '10kb' // only allow JSON request bodies <= 10kb
     const jsonOptions = { limit }
     const urlOptions = { extended: true, limit }
     const pathToStaticFiles = `${this.variables.PWD}/public`
