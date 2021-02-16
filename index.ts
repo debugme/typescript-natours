@@ -12,8 +12,10 @@ const database = new Database(services)
 database.connect()
 
 const server = new Server(services)
-server.handleRequest('/api/v1/tours', buildTourRouter(services))
-server.handleRequest('/api/v1/users', buildUserRouter(services))
+const tourRouter = buildTourRouter(services)
+const userRouter = buildUserRouter(services)
+server.handleRequest('/api/v1/tours', tourRouter)
+server.handleRequest('/api/v1/users', userRouter)
 server.handleRequest('*', defaultRouter)
 server.handleError(errorHandler)
 server.connect()
@@ -28,31 +30,3 @@ const cleanUp = async (error: Error) => {
 }
 process.on('uncaughtException', cleanUp)
 process.on('unhandledRejection', cleanUp)
-
-// const runtime = new Runtime(process, database, server)
-// runtime.connect()
-
-// interface Disconnectable {
-//   disconnect: () => {}
-// }
-
-// class Runtime {
-//   constructor(
-//     private process: NodeJS.Process,
-//     ...disconnectables: Disconnectable[]
-//   ) {
-//     this.disconnectables = disconnectables
-//   }
-//   connect = () => {
-//     this.process.on('uncaughtException', this.cleanUp)
-//     this.process.on('unhandledRejection', this.cleanUp)
-//   }
-//   cleanUp = async (error: Error) => {
-//     await database.disconnect()
-//     await server.disconnect()
-//     await new Promise((resolve) => {
-//       console.log('[process] terminating...', error)
-//       resolve(this.process.exit(1))
-//     })
-//   }
-// }
