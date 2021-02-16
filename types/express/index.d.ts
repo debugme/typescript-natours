@@ -4,8 +4,8 @@ import { EnvironmentVariables } from '../../environment/environment'
 declare global {
   namespace Express {
     interface Request {
-      // Extend Express.Request to reference the currently logged in user
-      user: UserDocument
+      // Extend Express.Request to allow arbitrary values to be stored
+      context: any
     }
   }
   namespace NodeJS {

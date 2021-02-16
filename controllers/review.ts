@@ -29,7 +29,7 @@ const validateCreateReview = tryCatch(async (request, response, next) => {
 
 const createReview = tryCatch(async (request, response) => {
   const payload = {
-    user: request.user.id,
+    user: request.context.user.id,
     tour: request.params.tourId,
     review: request.body.review,
     rating: request.body.rating,
