@@ -52,7 +52,7 @@ export const buildUserRouter = (environment: Environment, emailer: Emailer) => {
     .get(userController.getAllUsers)
 
   router
-    .route('/:id')
+    .route('/:userId')
     .get(userController.getUser)
     .patch(userController.updateUser)
     .delete(userController.deleteUser)

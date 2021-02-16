@@ -1,5 +1,4 @@
 import mongoose, { Document, Query } from 'mongoose'
-import { Tour } from './tour'
 import { User } from './user'
 
 export interface ReviewDocument extends Document {
@@ -24,11 +23,11 @@ export const ReviewSchema = new mongoose.Schema<ReviewDocument>(
     },
     createdAt: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
     },
     tour: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: Tour.modelName,
+      ref: 'Tour', //FIXME: for some reason Tour.modelName is undefined!
       required: [true, 'Error - A review must have a tour'],
     },
     user: {
@@ -40,18 +39,14 @@ export const ReviewSchema = new mongoose.Schema<ReviewDocument>(
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 )
 
-// [QUERY MIDDLEWARE] - filter out __v field from all elements under user field and tour field
+// [QUERY MIDDLEWARE]
 ReviewSchema.pre<Query<ReviewDocument, ReviewDocument>>(
   /^find/,
   function (next) {
     this.populate({
       path: 'user',
       select: 'name photo',
-    }).populate({
-      path: 'tour',
-      select: 'name',
     })
-
     next(null)
   }
 )

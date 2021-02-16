@@ -20,11 +20,11 @@ const createTour = tryCatch(async (request, response) => {
 
 const getTour = tryCatch(async (request, response) => {
   const {
-    params: { id },
+    params: { tourId },
   } = request
-  const tour = await Tour.findById(id)
+  const tour = await Tour.findById(tourId).populate('reviews')
   if (!tour) {
-    const message = `could not find tour with id ${id} `
+    const message = `could not find tour with id ${tourId} `
     const statusCode = StatusCodes.NOT_FOUND
     throw new ServerError(message, statusCode)
   }

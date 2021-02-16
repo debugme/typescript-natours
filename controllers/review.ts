@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
 import { pick } from 'ramda'
 import { Review, ReviewSchema } from '../models/review'
+import { Tour } from '../models/tour'
 import {
   ServerError,
   StatusTexts,
@@ -15,24 +16,50 @@ const getAllReviews = tryCatch(async (request, response) => {
 })
 
 const validateCreateReview = tryCatch(async (request, response, next) => {
-  const { body } = request
+  const { body, params } = request
+  const { tourId } = params
+  const tour = await Tour.findById(tourId)
   const fields = Object.keys(ReviewSchema.obj)
-  const { review, rating, tour, user } = pick(fields, body)
+  const { review, rating } = pick(fields, body)
   if (!review) throw new ServerError('Please provide a review')
   if (!rating) throw new ServerError('Please provide a rating between 1 and 5')
   if (!tour) throw new ServerError('Please provide a tour id')
-  if (!user) throw new ServerError('Please provide a user id')
   next()
 })
 
 const createReview = tryCatch(async (request, response) => {
-  const review = await Review.create(request.body)
+  const payload = {
+    user: request.user.id,
+    tour: request.params.tourId,
+    review: request.body.review,
+    rating: request.body.rating,
+  }
+  const review = await Review.create(payload)
+  const status = StatusTexts.SUCCESS
+  const cargo = { status, data: { review } }
+  response.status(StatusCodes.CREATED).json(cargo)
+})
+
+const validateGetReview = tryCatch(async (request, response, next) => {
+  const { tourId, reviewId } = request.params
+  const tour = await Tour.findById(tourId)
+  if (!tour) throw new ServerError('Please provide a valid tourId')
+  const review = Review.findById(reviewId)
+  if (!review) throw new ServerError('Please provide a valid reviewId')
+  next()
+})
+
+const getReview = tryCatch(async (request, response) => {
+  const { reviewId } = request.params
+  const review = Review.findById(reviewId)
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { review } }
   response.status(StatusCodes.CREATED).json(cargo)
 })
 
 export const reviewController = {
+  validateGetReview,
+  getReview,
   getAllReviews,
   validateCreateReview,
   createReview,

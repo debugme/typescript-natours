@@ -1,5 +1,6 @@
 import mongoose, { Aggregate, Document, Query } from 'mongoose'
 import slugify from 'slugify'
+import { Review, ReviewSchema } from './review'
 import { User } from './user'
 
 export interface TourDocument extends Document {
@@ -99,7 +100,7 @@ export const TourSchema = new mongoose.Schema<TourDocument>(
     images: [String],
     createdAt: {
       type: Date,
-      default: Date.now(),
+      default: Date.now,
       select: false, // setting this to false means do NOT return this field when you make any mongodb queries against the tours collection
     },
     startDates: [Date],
@@ -152,6 +153,13 @@ export const TourSchema = new mongoose.Schema<TourDocument>(
 // Note: the "this" keyword refers to the document itself
 TourSchema.virtual('durationInWeeks').get(function (this: TourDocument) {
   return this.duration / 7
+})
+
+// [VIRTUAL POPULATE]
+TourSchema.virtual('reviews', {
+  ref: 'Review', // Review.modelName,
+  foreignField: 'tour',
+  localField: '_id',
 })
 
 // [DOCUMENT MIDDLEWARE] - only runs on .save() and .create()
