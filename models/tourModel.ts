@@ -146,6 +146,10 @@ export const TourSchema = new mongoose.Schema<TourDocument>(
   { toJSON: { virtuals: true }, toObject: { virtuals: true } }
 )
 
+// Create a list of tour documents indexed by price to allow for faster look-ups
+TourSchema.index({ price: 1, ratingsAverage: -1 })
+TourSchema.index({ slug: 1 })
+
 // [VIRTUAL FIELD]
 // Create a virtual field whose value is calculated from the value of other fields on the schema
 // Note: as this field is not stored in the database, you can't refer to this field in a query
