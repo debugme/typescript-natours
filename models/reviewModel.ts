@@ -5,8 +5,8 @@ export interface ReviewDocument extends Document {
   review: string
   rating: number
   createdAt: Date
-  tour: mongoose.Schema.Types.ObjectId
-  user: mongoose.Schema.Types.ObjectId
+  tour: mongoose.Types.ObjectId
+  user: mongoose.Types.ObjectId
 }
 
 export const ReviewSchema = new mongoose.Schema<ReviewDocument>(
@@ -26,12 +26,12 @@ export const ReviewSchema = new mongoose.Schema<ReviewDocument>(
       default: Date.now,
     },
     tour: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: 'Tour', //FIXME: for some reason Tour.modelName is undefined!
       required: [true, 'Error - A review must have a tour'],
     },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Types.ObjectId,
       ref: UserModel.modelName,
       required: [true, 'Error - A review must have a user'],
     },

@@ -9,9 +9,12 @@ import {
 } from '../utilities/controllerUtils'
 
 const getAllReviews = tryCatch(async (request, response) => {
-  const reviews = await ReviewModel.find()
+  const { tourId } = request.params
+  const filters = tourId ? { tour: tourId } : {}
+  const reviews = await ReviewModel.find(filters)
   const status = StatusTexts.SUCCESS
-  const cargo = { status, data: { reviews } }
+  const results = reviews.length
+  const cargo = { status, meta: { results }, data: { reviews } }
   response.status(StatusCodes.OK).json(cargo)
 })
 

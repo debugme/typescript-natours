@@ -6,9 +6,7 @@ import { Services } from '../services'
 
 export const buildReviewRouter = (services: Services) => {
   const { environment } = services
-  const options = {
-    mergeParams: true, // if true, then add params from calling router (e.g. tourRouter) into review router
-  }
+  const options = { mergeParams: true } // Add params from calling router (e.g. tourRouter) into review router
   const reviewRouter = Router(options)
 
   reviewRouter.route('/:reviewId').get(reviewController.getReview)
@@ -22,5 +20,6 @@ export const buildReviewRouter = (services: Services) => {
       reviewController.createReview
     )
     .get(reviewController.getAllReviews)
+
   return reviewRouter
 }

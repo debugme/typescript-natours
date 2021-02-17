@@ -1,6 +1,5 @@
 import mongoose, { Aggregate, Document, Query } from 'mongoose'
 import slugify from 'slugify'
-import { ReviewModel, ReviewSchema } from './reviewModel'
 import { UserModel } from './userModel'
 
 export interface TourDocument extends Document {
@@ -139,7 +138,7 @@ export const TourSchema = new mongoose.Schema<TourDocument>(
     // An example of how to refer to documents in other collections
     guides: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: mongoose.Types.ObjectId,
         ref: UserModel.modelName,
       },
     ],
