@@ -1,6 +1,8 @@
 import mongoose, { Document, Query } from 'mongoose'
 import { UserModel } from './userModel'
 
+import { TourModel } from './tourModel'
+
 export interface ReviewDocument extends Document {
   review: string
   rating: number
@@ -27,7 +29,7 @@ export const ReviewSchema = new mongoose.Schema<ReviewDocument>(
     },
     tour: {
       type: mongoose.Types.ObjectId,
-      ref: 'Tour', //FIXME: for some reason Tour.modelName is undefined!
+      ref: TourModel.modelName,
       required: [true, 'Error - A review must have a tour'],
     },
     user: {

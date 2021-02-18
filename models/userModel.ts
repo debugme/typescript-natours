@@ -99,7 +99,7 @@ UserSchema.pre('save', function (next) {
 
 // [QUERY MIDDLEWARE] - before running any findXXX method, amend the filter to only include active users
 UserSchema.pre<Query<UserDocument, UserDocument>>(/^find/, function () {
-  this.find({ isActive: { $ne: false } }).select('-__v')
+  this.find({ isActive: { $ne: false } })
 })
 
 // Create a new instance method for documents in the users collection

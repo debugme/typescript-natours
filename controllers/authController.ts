@@ -19,8 +19,8 @@ import { Services } from '../services'
 
 const validateSignUp = (services: Services) =>
   tryCatch(async (request, response, next) => {
-    const { environment, context } = services
     try {
+      const { environment, context } = services
       const fields = 'name,email,password,passwordConfirm,role,photo'.split(',')
       const values = pick(fields, request.body)
       const newUser = await UserModel.create(values)
@@ -31,10 +31,10 @@ const validateSignUp = (services: Services) =>
       context.setUserDocument(user)
       context.setAccessToken(accessToken)
       context.setCookieOptions(cookieOptions)
+      next()
     } catch (error) {
       throw new ServerError(error.message)
     }
-    next()
   })
 
 const signUp = (services: Services) =>

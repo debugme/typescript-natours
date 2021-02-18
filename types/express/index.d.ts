@@ -5,6 +5,7 @@ declare global {
   namespace Express {
     interface Request {
       // Extend Express.Request to allow arbitrary values to be stored
+      // FIXME: remove this once you have replaced this with services.context
       context: any
     }
   }
