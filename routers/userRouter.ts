@@ -11,13 +11,13 @@ export const buildUserRouter = (services: Services) => {
   userRouter
     .post(
       '/signup',
-      authController.validateSignUp,
-      authController.signUp(environment)
+      authController.validateSignUp(services),
+      authController.signUp(services)
     )
     .post(
       '/signin',
-      authController.validateSignIn,
-      authController.signIn(environment)
+      authController.validateSignIn(services),
+      authController.signIn(services)
     )
     .post(
       '/forgot-password',
@@ -57,5 +57,6 @@ export const buildUserRouter = (services: Services) => {
     .get(userController.getUser)
     .patch(userController.updateUser)
     .delete(userController.deleteUser)
+
   return userRouter
 }

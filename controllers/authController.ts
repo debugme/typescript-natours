@@ -15,55 +15,70 @@ import {
 import { UserModel } from '../models/userModel'
 import { Environment } from '../environment/environment'
 import { Emailer } from '../emailer/emailer'
+import { Services } from '../services'
 
-const validateSignUp = tryCatch(async (request, response, next) => {
-  try {
-    const fields = [
-      'name',
-      'email',
-      'password',
-      'passwordConfirm',
-      'role',
-      'photo',
-    ]
-    const user = await UserModel.create(pick(fields, request.body))
-    request.context = { user }
-  } catch (error) {
-    throw new ServerError(error.message)
-  }
-  next()
-})
+const validateSignUp = (services: Services) =>
+  tryCatch(async (request, response, next) => {
+    const { environment, context } = services
+    try {
+      const fields = 'name,email,password,passwordConfirm,role,photo'.split(',')
+      const values = pick(fields, request.body)
+      const newUser = await UserModel.create(values)
+      const user = await UserModel.findById(newUser.id)
+      if (!user) throw new Error(`Unable to find newly created user`)
+      const accessToken = buildAccessToken(environment, user.id)
+      const cookieOptions = buildCookieOptions(environment)
+      context.setUserDocument(user)
+      context.setAccessToken(accessToken)
+      context.setCookieOptions(cookieOptions)
+    } catch (error) {
+      throw new ServerError(error.message)
+    }
+    next()
+  })
 
-const signUp = (environment: Environment) =>
+const signUp = (services: Services) =>
   tryCatch(async (request, response) => {
-    const { user } = request.context
-    const accessToken = buildAccessToken(environment, user.id)
-    response.cookie('accessToken', accessToken, buildCookieOptions(environment))
+    const { context } = services
+    const user = context.getUserDocument()
+    const accessToken = context.getAccessToken()
+    const cookieOptions = context.getCookieOptions()
     const status = StatusTexts.SUCCESS
-    const cargo = { status, accessToken, data: { user } } // TODO: remove password fields from user before sending response back to client
+    const cargo = { status, data: { user } }
+    response.cookie('accessToken', accessToken, cookieOptions)
     response.status(StatusCodes.CREATED).json(cargo)
   })
 
-const validateSignIn = tryCatch(async (request, response, next) => {
-  const { email, password } = request.body
-  if (!email) throw new ServerError('Please provide an e-mail')
-  if (!password) throw new ServerError('Please provide a password')
-  const user = await UserModel.findOne({ email }).select('+password')
-  if (!user) throw new ServerError('Please provide known email')
-  const isCorrectPassword = await user.isCorrectPassword(password)
-  if (!isCorrectPassword)
-    throw new ServerError('Please provide correct password')
-  request.context = { user }
-  next()
-})
-
-const signIn = (environment: Environment) =>
-  tryCatch(async (request, response) => {
-    const { user } = request.context
+const validateSignIn = (services: Services) =>
+  tryCatch(async (request, response, next) => {
+    const { environment, context } = services
+    const { email, password } = request.body
+    if (!email) throw new ServerError('Please provide an e-mail')
+    if (!password) throw new ServerError('Please provide a password')
+    const foundUser = await UserModel.findOne({ email }).select('+password')
+    if (!foundUser) throw new ServerError('Please provide known email')
+    const isCorrectPassword = await foundUser.isCorrectPassword(password)
+    if (!isCorrectPassword)
+      throw new ServerError('Please provide correct password')
+    const user = await UserModel.findById(foundUser.id)
+    if (!user) throw new Error(`Unable to find user`)
     const accessToken = buildAccessToken(environment, user.id)
-    response.cookie('accessToken', accessToken, buildCookieOptions(environment))
+    const cookieOptions = buildCookieOptions(environment)
+    context.setUserDocument(user)
+    context.setAccessToken(accessToken)
+    context.setCookieOptions(cookieOptions)
+    next()
+  })
+
+const signIn = (services: Services) =>
+  tryCatch(async (request, response) => {
+    const { context } = services
+    const user = context.getUserDocument()
+    const accessToken = context.getAccessToken()
+    const cookieOptions = context.getCookieOptions()
     const status = StatusTexts.SUCCESS
-    const cargo = { status, accessToken, data: { user } }
+    const cargo = { status, data: { user } }
+    response.cookie('accessToken', accessToken, cookieOptions)
     response.status(StatusCodes.OK).json(cargo)
   })
 

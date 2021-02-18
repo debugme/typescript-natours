@@ -1,6 +1,8 @@
 ## TODO
 
 • add unit tests for each of the endpoints that you have built
+• update code in controllers to use services.context rather than request.context
+• organize files by feature rather than by category (I am spending too much time scanning up and down the explorer to find related files)
 • allow checking against a list of roles rather than a single role
 • use AJV schema validation for request JSON bodies
 • create swagger docs for each of your endpoints
