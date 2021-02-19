@@ -13,23 +13,22 @@ import express, {
   Router,
 } from 'express'
 
-import { ExpressVariables, NodeVariables } from '../services/environment'
 import { Services } from '../services/services'
+
+type BuildRouter = (services: Services) => Router
 
 export class Server {
   private httpServer?: http.Server
   private server: Express = express()
-  private expressVariables: ExpressVariables
-  private nodeVariables: NodeVariables
-
+  private services: Services
   constructor(services: Services) {
-    const { environment } = services
-    this.nodeVariables = environment.getNodeVariables()
-    this.expressVariables = environment.getExpressVariables()
+    this.services = services
     this.setUpMiddleware()
   }
 
   private setUpMiddleware = () => {
+    const { environment } = this.services
+    const nodeVariables = environment.getNodeVariables()
     const max = 100 // the number of requests allowed to be made within a window of time
     const windowMs = 60 * 60 * 1000 // a 1 hour window of time
     const message = 'Too many requests. Try again in an hour.'
@@ -37,7 +36,7 @@ export class Server {
     const limit = '10kb' // only allow JSON request bodies <= 10kb
     const jsonOptions = { limit }
     const urlOptions = { extended: true, limit }
-    const pathToStaticFiles = `${this.nodeVariables.PWD}/public`
+    const pathToStaticFiles = `${nodeVariables.PWD}/public`
     const whitelist = [
       'duration',
       'ratingsQuantity',
@@ -64,8 +63,8 @@ export class Server {
     else this.server.use(handler)
   }
 
-  public handleRequest = (path: string, handler: Router) => {
-    this.server.use(path, handler)
+  public handleRequest = (path: string, buildRouter: BuildRouter) => {
+    this.server.use(path, buildRouter(this.services))
   }
 
   public handleError = (handler: ErrorRequestHandler) => {
@@ -73,7 +72,9 @@ export class Server {
   }
 
   public connect = () => {
-    const { EXPRESS_PORT } = this.expressVariables
+    const { environment } = this.services
+    const expressVariables = environment.getExpressVariables()
+    const { EXPRESS_PORT } = expressVariables
     const listener = () => console.log('[server] connected...')
     this.httpServer = this.server.listen(EXPRESS_PORT, listener)
   }

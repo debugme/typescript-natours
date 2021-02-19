@@ -13,12 +13,18 @@ const database = new Database(services)
 database.connect()
 
 const server = new Server(services)
-server.handleRequest('/api/v1/tours', buildTourRouter(services))
-server.handleRequest('/api/v1/users', buildUserRouter(services))
-server.handleRequest('/api/v1/auth', buildAuthRouter(services))
-server.handleRequest('*', buildDefaultRouter(services))
+server.handleRequest('/api/v1/tours', buildTourRouter)
+server.handleRequest('/api/v1/users', buildUserRouter)
+server.handleRequest('/api/v1/auth', buildAuthRouter)
+server.handleRequest('*', buildDefaultRouter)
 server.handleError(errorHandler)
 server.connect()
+
+// PROPOSAL FOR CLEANUP CODE BELOW
+// const runtime = new Runtime(services)
+// runtime.onError(database.disconnect())
+// runtime.onError(server.disconnect())
+// runtime.connect()
 
 const cleanUp = async (error: Error) => {
   await database.disconnect()
