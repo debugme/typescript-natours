@@ -1,8 +1,9 @@
 import jsonwebtoken from 'jsonwebtoken'
 import crypto from 'crypto'
-import { Environment } from '../services/environment'
+import { Services } from '../services/services'
 
-const buildAccessToken = (environment: Environment, id: string) => {
+const buildAccessToken = (services: Services, id: string) => {
+  const { environment } = services
   const variables = environment.getJwtVariables()
   const { JWT_SECRET_KEY: secretKey, JWT_EXPIRES_IN: expiresIn } = variables
   const options = { expiresIn }
@@ -12,10 +13,8 @@ const buildAccessToken = (environment: Environment, id: string) => {
 
 const decodeAccessToken = (accessToken: string, secretKey: string) => {
   try {
-    const data = jsonwebtoken.verify(accessToken, secretKey) as {
-      id: string
-      iat: number
-    }
+    type Data = { id: string; iat: number }
+    const data = jsonwebtoken.verify(accessToken, secretKey) as Data
     return data
   } catch (error) {
     return null
@@ -25,7 +24,8 @@ const decodeAccessToken = (accessToken: string, secretKey: string) => {
 const hashResetToken = (resetToken: string) =>
   crypto.createHash('sha256').update(resetToken).digest('hex')
 
-const buildCookieOptions = (environment: Environment) => {
+const buildCookieOptions = (services: Services) => {
+  const { environment } = services
   const { NODE_ENV } = environment.getNodeVariables()
   const { COOKIE_EXPIRES_IN } = environment.getJwtVariables()
   const amountInMs = Number(COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000

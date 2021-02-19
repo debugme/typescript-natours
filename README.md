@@ -1,5 +1,6 @@
 ## TODO
 
+• create factory for creating generic createOne, deleteOne, getOne, getAll, updateOne, deleteOne functions that can be used inside controllers
 • add unit tests for each of the endpoints that you have built
 • organize files by feature rather than by category (I am spending too much time scanning up and down the explorer to find related files)
 • allow checking against a list of roles rather than a single role

@@ -8,7 +8,7 @@ import {
   tryCatch,
 } from '../utilities/controllerUtils'
 
-import { UserModel, userFields } from '../models/userModel'
+import { UserModel, UserSchema } from '../models/userModel'
 import { StatusCodes } from 'http-status-codes'
 
 const createUser = tryCatch(async (request, response) => {
@@ -27,6 +27,7 @@ const getUser = tryCatch(async (request, response) => {
 
 const getAllUsers = tryCatch(async (request, response) => {
   const { query } = request
+  const userFields = Object.keys(UserSchema.obj)
   const filters = getFilters(query, userFields)
   const projection = getProjection(query)
   const sortFields = getSortFields(query)

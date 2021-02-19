@@ -24,8 +24,8 @@ const validateSignUp = (services: Services) =>
       const newUser = await UserModel.create(values)
       const user = await UserModel.findById(newUser.id)
       if (!user) throw new Error(`Unable to find newly created user`)
-      const accessToken = buildAccessToken(environment, user.id)
-      const cookieOptions = buildCookieOptions(environment)
+      const accessToken = buildAccessToken(services, user.id)
+      const cookieOptions = buildCookieOptions(services)
       context.setUserDocument(user)
       context.setAccessToken(accessToken)
       context.setCookieOptions(cookieOptions)
@@ -60,8 +60,8 @@ const validateSignIn = (services: Services) =>
       throw new ServerError('Please provide correct password')
     const user = await UserModel.findById(foundUser.id)
     if (!user) throw new Error(`Unable to find user`)
-    const accessToken = buildAccessToken(environment, user.id)
-    const cookieOptions = buildCookieOptions(environment)
+    const accessToken = buildAccessToken(services, user.id)
+    const cookieOptions = buildCookieOptions(services)
     context.setUserDocument(user)
     context.setAccessToken(accessToken)
     context.setCookieOptions(cookieOptions)
@@ -186,7 +186,11 @@ const validateResetPassword = (services: Services) =>
     const user = await UserModel.findOne(filters)
     if (!user)
       throw new ServerError('Password reset token is either invalid or expired')
+    const accessToken = buildAccessToken(services, user.id)
+    const cookieOptions = buildCookieOptions(services)
     context.setUserDocument(user)
+    context.setAccessToken(accessToken)
+    context.setCookieOptions(cookieOptions)
     next()
   })
 
@@ -197,10 +201,11 @@ const resetPassword = (services: Services) =>
     const { password, passwordConfirm } = request.body
     user.resetPassword(password, passwordConfirm)
     await user.save()
-    const accessToken = buildAccessToken(environment, user.id)
-    response.cookie('accessToken', accessToken, buildCookieOptions(environment))
+    const accessToken = context.getAccessToken()
+    const cookieOptions = context.getCookieOptions()
     const status = StatusTexts.SUCCESS
     const cargo = { status, accessToken }
+    response.cookie('accessToken', accessToken, cookieOptions)
     response.status(StatusCodes.OK).json(cargo)
   })
 
@@ -219,21 +224,26 @@ const validateUpdatePassword = (services: Services) =>
       throw new ServerError(
         'Please make sure newPassword and newPasswordConfirm match'
       )
+    const accessToken = buildAccessToken(services, user.id)
+    const cookieOptions = buildCookieOptions(services)
+    context.setAccessToken(accessToken)
+    context.setCookieOptions(cookieOptions)
     next()
   })
 
 const updatePassword = (services: Services) =>
   tryCatch(async (request, response) => {
-    const { environment, context } = services
+    const { context } = services
     const user = context.getUserDocument()
     const { newPassword, newPasswordConfirm } = request.body
     user.password = newPassword
     user.passwordConfirm = newPasswordConfirm
     user.save()
-    const accessToken = buildAccessToken(environment, user.id)
-    response.cookie('accessToken', accessToken, buildCookieOptions(environment))
+    const accessToken = context.getAccessToken()
+    const cookieOptions = context.getCookieOptions()
     const status = StatusTexts.SUCCESS
     const cargo = { status, accessToken }
+    response.cookie('accessToken', accessToken, cookieOptions)
     response.status(StatusCodes.OK).json(cargo)
   })
 
