@@ -7,9 +7,8 @@ import { buildReviewRouter } from '../routers/reviewRouter'
 
 export const buildTourRouter = (services: Services) => {
   const tourRouter = Router()
-  const { environment } = services
-  const reviewRouter = buildReviewRouter(services)
 
+  const reviewRouter = buildReviewRouter(services)
   tourRouter.use('/:tourId/reviews', reviewRouter)
 
   tourRouter.route('/stats').get(tourController.getTourStats)
@@ -20,15 +19,15 @@ export const buildTourRouter = (services: Services) => {
     .get(tourController.getTour)
     .patch(tourController.updateTour)
     .delete(
-      authController.validateIsAuthenticated(environment),
-      authController.validateIsAuthorised('lead-guide', 'admin'),
+      authController.validateIsAuthenticated(services),
+      authController.validateIsAuthorised(services, 'lead-guide', 'admin'),
       tourController.deleteTour
     )
 
   tourRouter
     .route('/')
     .get(
-      authController.validateIsAuthenticated(environment),
+      authController.validateIsAuthenticated(services),
       tourController.getAllTours
     )
     .post(tourController.createTour)

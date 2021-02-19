@@ -1,6 +1,6 @@
 import { Router } from 'express'
-import { authController } from '../controllers/authController'
 
+import { authController } from '../controllers/authController'
 import { reviewController } from '../controllers/reviewController'
 import { Services } from '../services'
 
@@ -14,8 +14,8 @@ export const buildReviewRouter = (services: Services) => {
   reviewRouter
     .route('/')
     .post(
-      authController.validateIsAuthenticated(environment),
-      authController.validateIsAuthorised('user'),
+      authController.validateIsAuthenticated(services),
+      authController.validateIsAuthorised(services, 'user'),
       reviewController.validateCreateReview,
       reviewController.createReview
     )

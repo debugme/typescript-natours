@@ -5,7 +5,6 @@ import { Services } from '../services'
 
 export const buildAuthRouter = (services: Services) => {
   const authRouter = Router()
-  const { environment, emailer } = services
 
   authRouter
     .post(
@@ -20,30 +19,30 @@ export const buildAuthRouter = (services: Services) => {
     )
     .post(
       '/forgot-password',
-      authController.validateForgotPassword,
-      authController.forgotPassword(environment, emailer)
+      authController.validateForgotPassword(services),
+      authController.forgotPassword(services)
     )
     .patch(
       '/reset-password/:resetToken',
-      authController.validateResetPassword,
-      authController.resetPassword(environment)
+      authController.validateResetPassword(services),
+      authController.resetPassword(services)
     )
     .patch(
       '/update-password',
-      authController.validateIsAuthenticated(environment),
-      authController.validateUpdatePassword,
-      authController.updatePassword(environment)
+      authController.validateIsAuthenticated(services),
+      authController.validateUpdatePassword(services),
+      authController.updatePassword(services)
     )
     .patch(
       '/update-user',
-      authController.validateIsAuthenticated(environment),
-      authController.validateUpdateUser,
-      authController.updateUser
+      authController.validateIsAuthenticated(services),
+      authController.validateUpdateUser(services),
+      authController.updateUser(services)
     )
     .delete(
       '/delete-user',
-      authController.validateIsAuthenticated(environment),
-      authController.deleteUser
+      authController.validateIsAuthenticated(services),
+      authController.deleteUser(services)
     )
 
   return authRouter
