@@ -5,7 +5,7 @@ import { buildUserRouter } from './routers/userRouter'
 import { buildAuthRouter } from './routers/authRouter'
 import { buildDefaultRouter } from './routers/defaultRouter'
 import { errorHandler } from './controllers/errorHandler'
-import { Services } from './services'
+import { Services } from './services/services'
 
 const services = new Services(process)
 

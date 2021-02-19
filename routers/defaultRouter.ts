@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { Services } from '../services'
+import { Services } from '../services/services'
 import { defaultController } from '../controllers/defaultController'
 
 export const buildDefaultRouter = (services: Services) => {

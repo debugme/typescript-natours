@@ -2,7 +2,7 @@ import { Router } from 'express'
 
 import { authController } from '../controllers/authController'
 import { reviewController } from '../controllers/reviewController'
-import { Services } from '../services'
+import { Services } from '../services/services'
 
 export const buildReviewRouter = (services: Services) => {
   const { environment } = services

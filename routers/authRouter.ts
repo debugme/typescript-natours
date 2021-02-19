@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
 import { authController } from '../controllers/authController'
-import { Services } from '../services'
+import { Services } from '../services/services'
 
 export const buildAuthRouter = (services: Services) => {
   const authRouter = Router()

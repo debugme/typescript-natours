@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer'
 
-import { EmailVariables, Environment } from '../environment/environment'
+import { EmailVariables, Environment } from './environment'
 
 export interface EmailOptions {
   from: string

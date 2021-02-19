@@ -43,7 +43,7 @@ export class Environment {
   constructor(environment: NodeJS.ProcessEnv) {
     this.environment = environment
     const { PWD, NODE_ENV } = this.getNodeVariables()
-    const path = `${PWD}/environment/.${NODE_ENV}.env`
+    const path = `${PWD}/.${NODE_ENV}.env`
     dotenv.config({ path })
   }
 

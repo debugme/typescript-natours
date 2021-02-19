@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
-import { MongoVariables } from '../environment/environment'
-import { Services } from '../services'
+import { MongoVariables } from '../services/environment'
+import { Services } from '../services/services'
 
 export class Database {
   private mongoUri: string

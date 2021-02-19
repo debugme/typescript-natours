@@ -13,8 +13,8 @@ import express, {
   Router,
 } from 'express'
 
-import { ExpressVariables, NodeVariables } from '../environment/environment'
-import { Services } from '../services'
+import { ExpressVariables, NodeVariables } from '../services/environment'
+import { Services } from '../services/services'
 
 export class Server {
   private httpServer?: http.Server

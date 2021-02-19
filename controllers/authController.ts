@@ -13,7 +13,7 @@ import {
   buildCookieOptions,
 } from '../utilities/tokenUtils'
 import { UserModel } from '../models/userModel'
-import { Services } from '../services'
+import { Services } from '../services/services'
 
 const validateSignUp = (services: Services) =>
   tryCatch(async (request, response, next) => {

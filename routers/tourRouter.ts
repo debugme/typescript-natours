@@ -1,6 +1,6 @@
 import { Router } from 'express'
 
-import { Services } from '../services'
+import { Services } from '../services/services'
 import { tourController } from '../controllers/tourController'
 import { authController } from '../controllers/authController'
 import { buildReviewRouter } from '../routers/reviewRouter'

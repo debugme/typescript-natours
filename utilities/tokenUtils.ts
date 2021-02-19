@@ -1,6 +1,6 @@
 import jsonwebtoken from 'jsonwebtoken'
 import crypto from 'crypto'
-import { Environment } from '../environment/environment'
+import { Environment } from '../services/environment'
 
 const buildAccessToken = (environment: Environment, id: string) => {
   const variables = environment.getJwtVariables()

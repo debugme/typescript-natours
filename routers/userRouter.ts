@@ -1,7 +1,7 @@
 import { Router } from 'express'
 
 import { userController } from '../controllers/userController'
-import { Services } from '../services'
+import { Services } from '../services/services'
 
 export const buildUserRouter = (services: Services) => {
   const userRouter = Router()

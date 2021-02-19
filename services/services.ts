@@ -1,6 +1,6 @@
-import { Environment } from './environment/environment'
-import { Emailer } from './emailer/emailer'
-import { Context } from './context/context'
+import { Environment } from './environment'
+import { Emailer } from './emailer'
+import { Context } from './context'
 
 export class Services {
   public environment: Environment

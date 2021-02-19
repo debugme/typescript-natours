@@ -1,5 +1,5 @@
 import { UserDocument } from '../../models/userModel'
-import { EnvironmentVariables } from '../../environment/environment'
+import { EnvironmentVariables } from '../../services/environment'
 
 declare global {
   namespace Express {
