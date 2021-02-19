@@ -49,7 +49,7 @@ export class Server {
     const hppWhitelist = { whitelist }
 
     this.handleMiddleware(helmet())
-    this.handleRequest('/api', rateLimiter)
+    this.handleMiddleware(rateLimiter, '/api')
     this.handleMiddleware(morgan('dev'))
     this.handleMiddleware(express.json(jsonOptions))
     this.handleMiddleware(express.urlencoded(urlOptions))
@@ -59,11 +59,12 @@ export class Server {
     this.handleMiddleware(express.static(pathToStaticFiles))
   }
 
-  public handleMiddleware = (handler: RequestHandler) => {
-    this.server.use(handler)
+  public handleMiddleware = (handler: RequestHandler, path: string = '') => {
+    if (path) this.server.use(path, handler)
+    else this.server.use(handler)
   }
 
-  public handleRequest = (path: string, handler: Router | RequestHandler) => {
+  public handleRequest = (path: string, handler: Router) => {
     this.server.use(path, handler)
   }
 

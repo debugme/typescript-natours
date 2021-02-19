@@ -2,7 +2,8 @@ import { Server } from './server/server'
 import { Database } from './database/database'
 import { buildTourRouter } from './routers/tourRouter'
 import { buildUserRouter } from './routers/userRouter'
-import { defaultRouter } from './controllers/defaultController'
+import { buildAuthRouter } from './routers/authRouter'
+import { buildDefaultRouter } from './routers/defaultRouter'
 import { errorHandler } from './controllers/errorHandler'
 import { Services } from './services'
 
@@ -12,11 +13,10 @@ const database = new Database(services)
 database.connect()
 
 const server = new Server(services)
-const tourRouter = buildTourRouter(services)
-const userRouter = buildUserRouter(services)
-server.handleRequest('/api/v1/tours', tourRouter)
-server.handleRequest('/api/v1/users', userRouter)
-server.handleRequest('*', defaultRouter)
+server.handleRequest('/api/v1/tours', buildTourRouter(services))
+server.handleRequest('/api/v1/users', buildUserRouter(services))
+server.handleRequest('/api/v1/auth', buildAuthRouter(services))
+server.handleRequest('*', buildDefaultRouter(services))
 server.handleError(errorHandler)
 server.connect()
 
