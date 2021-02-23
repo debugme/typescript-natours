@@ -4,11 +4,11 @@
 • add unit tests for each of the endpoints that you have built
 • organize files by feature rather than by category (I am spending too much time scanning up and down the explorer to find related files)
 • allow checking against a list of roles rather than a single role
-• use AJV schema validation for request JSON bodies
+• use AJV/JOI schema validation for request JSON bodies
 • create swagger docs for each of your endpoints
 • pass refresh token in cookie in response header back to client
 • amend code to send tokens (e.g. access token or refresh token) in httpOnly cookie in response header rather than as part of JSON response body
-• use pino for express logging (Perhaps use clalk too?)
+• use pino for express logging (Perhaps use chalk too?)
 • built a small REPL tool for inserting/removing demo data into MongoDB
 • add better edgecase handling e.g.
 

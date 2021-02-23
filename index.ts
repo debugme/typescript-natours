@@ -6,6 +6,7 @@ import { buildAuthRouter } from './routers/authRouter'
 import { buildDefaultRouter } from './routers/defaultRouter'
 import { errorHandler } from './controllers/errorHandler'
 import { Services } from './services/services'
+import { Runtime } from './services/runtime'
 
 const services = new Services(process)
 
@@ -20,19 +21,7 @@ server.handleRequest('*', buildDefaultRouter)
 server.handleError(errorHandler)
 server.connect()
 
-// PROPOSAL FOR CLEANUP CODE BELOW
-// const runtime = new Runtime(services)
-// runtime.onError(database.disconnect())
-// runtime.onError(server.disconnect())
-// runtime.connect()
-
-const cleanUp = async (error: Error) => {
-  await database.disconnect()
-  await server.disconnect()
-  await new Promise((resolve) => {
-    console.log('[process] terminating...', error)
-    resolve(process.exit(1))
-  })
-}
-process.on('uncaughtException', cleanUp)
-process.on('unhandledRejection', cleanUp)
+const runtime = new Runtime(services)
+runtime.onError(database.disconnect)
+runtime.onError(server.disconnect)
+runtime.connect()
