@@ -16,13 +16,26 @@ const getAllReviews = tryCatch(async (request, response) => {
 
 const validateCreateReview = tryCatch(async (request, response, next) => {
   const { body, params } = request
-  const { tourId } = params
-  const tour = await TourModel.findById(tourId)
   const fields = Object.keys(ReviewSchema.obj)
   const { review, rating } = pick(fields, body)
+  const { tourId } = params
+
+  //--------------------------------------------------------------------------------
+  // FIXME: AJV/JOI validation
+  //--------------------------------------------------------------------------------
   if (!review) throw new ServerError('Please provide a review')
   if (!rating) throw new ServerError('Please provide a rating between 1 and 5')
-  if (!tour) throw new ServerError('Please provide a tour id')
+  if (!tourId) throw new ServerError('Please provide a tour id')
+  //--------------------------------------------------------------------------------
+
+  const tour = await TourModel.findById(tourId)
+
+  //--------------------------------------------------------------------------------
+  // FIXME: AJV/JOI validation
+  //--------------------------------------------------------------------------------
+  if (!tour) throw new ServerError('Please provude a valid tour id')
+  //--------------------------------------------------------------------------------
+
   next()
 })
 
@@ -41,6 +54,14 @@ const createReview = tryCatch(async (request, response) => {
 
 const validateGetReview = tryCatch(async (request, response, next) => {
   const { tourId, reviewId } = request.params
+
+  //--------------------------------------------------------------------------------
+  // FIXME: AJV/JOI validation
+  //--------------------------------------------------------------------------------
+  if (!reviewId) throw new ServerError('PPlease provide a review id')
+  if (!tourId) throw new ServerError('Please provide a tour id')
+  //--------------------------------------------------------------------------------
+
   const tour = await TourModel.findById(tourId)
   if (!tour) throw new ServerError('Please provide a valid tourId')
   const review = ReviewModel.findById(reviewId)

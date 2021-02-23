@@ -27,6 +27,9 @@ const getUser = tryCatch(async (request, response) => {
 
 const getAllUsers = tryCatch(async (request, response) => {
   const { query } = request
+  // ------------------------------------------------------
+  // FIXME: add AJV/JOI validation to request.query
+  // ------------------------------------------------------
   const userFields = Object.keys(UserSchema.obj)
   const filters = getFilters(query, userFields)
   const projection = getProjection(query)

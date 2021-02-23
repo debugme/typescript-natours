@@ -14,7 +14,17 @@ import { Services } from '../services/services'
 const validateSignUp = (services: Services) =>
   tryCatch(async (request, response, next) => {
     try {
-      const { environment, context } = services
+      const { context } = services
+
+      //------------------------------------------------------------------------------
+      // FIXME: add AJV/JOI validation instead
+      //------------------------------------------------------------------------------
+      // if invalid value for request.body.name provided then throw an exception
+      // if invalid value for request.body.email provided then throw an exception
+      // if invalid value for request.body.password provided then throw an exception
+      // if invalid value for request.body.passwordConfirm provided then throw an exception
+      //------------------------------------------------------------------------------
+
       const fields = 'name,email,password,passwordConfirm,role,photo'.split(',')
       const values = pick(fields, request.body)
       const newUser = await UserModel.create(values)
@@ -45,10 +55,15 @@ const signUp = (services: Services) =>
 
 const validateSignIn = (services: Services) =>
   tryCatch(async (request, response, next) => {
-    const { environment, context } = services
+    const { context } = services
+
+    // FIXME: replace with JAV/JOI validation instead
+    //------------------------------------------------------------------------------
     const { email, password } = request.body
     if (!email) throw new ServerError('Please provide an e-mail')
     if (!password) throw new ServerError('Please provide a password')
+    //------------------------------------------------------------------------------
+
     const foundUser = await UserModel.findOne({ email }).select('+password')
     if (!foundUser) throw new ServerError('Please provide known email')
     const isCorrectPassword = await foundUser.isCorrectPassword(password)
@@ -79,13 +94,13 @@ const signIn = (services: Services) =>
 const validateIsAuthenticated = (services: Services) =>
   tryCatch(async (request, response, next) => {
     const { environment, context } = services
+
+    // FIXME: replace with JAV/JOI validation instead
     const { authorization } = request.headers
     if (!authorization)
       throw new ServerError('Please provide authorization header')
-
     if (!authorization.toLowerCase().startsWith('bearer'))
       throw new ServerError('Please provide correct authorization header')
-
     const [_, accessToken] = authorization.split(' ')
     if (!accessToken)
       throw new ServerError('Please make sure you are logged in')
@@ -122,8 +137,14 @@ const validateIsAuthorised = (services: Services, ...roles: string[]) =>
 const validateForgotPassword = (services: Services) =>
   tryCatch(async (request, response, next) => {
     const { context } = services
+
+    //------------------------------------------------------------------------------
+    // FIXME: replace with JAV/JOI validation instead
+    //------------------------------------------------------------------------------
     const { email } = request.body
     if (!email) throw new ServerError('Please provide an email address')
+    //------------------------------------------------------------------------------
+
     const user = await UserModel.findOne({ email })
     if (!user) throw new ServerError('No user found with that email address')
     context.setUserDocument(user)
@@ -191,7 +212,7 @@ const validateResetPassword = (services: Services) =>
 
 const resetPassword = (services: Services) =>
   tryCatch(async (request, response) => {
-    const { context, environment } = services
+    const { context } = services
     const user = context.getUserDocument()
     const { password, passwordConfirm } = request.body
     user.resetPassword(password, passwordConfirm)
@@ -208,10 +229,11 @@ const validateUpdatePassword = (services: Services) =>
   tryCatch(async (request, response, next) => {
     const { context } = services
     const { oldPassword, newPassword, newPasswordConfirm } = request.body
-    const user = context.getUserDocument()
-    const isCorrectPassword = await user.isCorrectPassword(oldPassword)
-    if (!isCorrectPassword)
-      throw new ServerError('Existing password is not correct')
+
+    //------------------------------------------------------------------------------
+    // FIXME: replace with JAV/JOI validation instead
+    //------------------------------------------------------------------------------
+    if (!oldPassword) throw new ServerError('Current password is missing')
     if (!newPassword) throw new ServerError('Proposed password is missing')
     if (!newPasswordConfirm)
       throw new ServerError('Proposed password confirm is missing')
@@ -219,6 +241,13 @@ const validateUpdatePassword = (services: Services) =>
       throw new ServerError(
         'Please make sure newPassword and newPasswordConfirm match'
       )
+    //------------------------------------------------------------------------------
+
+    const user = context.getUserDocument()
+    const isCorrectPassword = await user.isCorrectPassword(oldPassword)
+    if (!isCorrectPassword)
+      throw new ServerError('Existing password is not correct')
+
     const accessToken = buildAccessToken(services, user.id)
     const cookieOptions = buildCookieOptions(services)
     context.setAccessToken(accessToken)
@@ -245,6 +274,10 @@ const updatePassword = (services: Services) =>
 const validateUpdateUser = (services: Services) =>
   tryCatch(async (request, response, next) => {
     const { password, passwordConfirm } = request.body
+
+    //------------------------------------------------------------------------------
+    // FIXME: replace with JAV/JOI validation instead
+    //------------------------------------------------------------------------------
     if (password)
       throw new ServerError(
         'Please use PATCH api/v1/users/update-password to update password'
@@ -253,6 +286,8 @@ const validateUpdateUser = (services: Services) =>
       throw new ServerError(
         'Please use PATCH api/v1/users/update-password to update passwordConfirm'
       )
+    //------------------------------------------------------------------------------
+
     next()
   })
 

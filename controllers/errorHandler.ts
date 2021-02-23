@@ -1,4 +1,4 @@
-import { ErrorRequestHandler, Request, Response, NextFunction } from 'express'
+import { ErrorRequestHandler, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
 
 import { StatusTexts } from './utilities'

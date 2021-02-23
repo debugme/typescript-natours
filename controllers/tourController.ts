@@ -12,6 +12,9 @@ import {
 } from './utilities'
 
 const createTour = tryCatch(async (request, response) => {
+  // ------------------------------------------------------
+  // FIXME: add AJV/JOI validation to request.body values
+  // ------------------------------------------------------
   const tour = await TourModel.create(request.body)
   const status = StatusTexts.SUCCESS
   const cargo = { status, data: { tour } }
@@ -22,6 +25,9 @@ const getTour = tryCatch(async (request, response) => {
   const {
     params: { tourId },
   } = request
+  // ------------------------------------------------------
+  // FIXME: add AJV/JOI validation to request.body values
+  // ------------------------------------------------------
   const tour = await TourModel.findById(tourId).populate('reviews')
   if (!tour) {
     const message = `could not find tour with id ${tourId} `
@@ -61,6 +67,9 @@ const updateTour = tryCatch(async (request, response) => {
     body,
     params: { id },
   } = request
+  // ------------------------------------------------------
+  // FIXME: add AJV/JOI validation to request.body values
+  // ------------------------------------------------------
   const options = { new: true, runValidators: true }
   const tour = await TourModel.findByIdAndUpdate(id, body, options)
   if (!tour) {
@@ -77,6 +86,9 @@ const deleteTour = tryCatch(async (request, response) => {
   const {
     params: { id },
   } = request
+  // ------------------------------------------------------
+  // FIXME: add AJV/JOI validation to request.body values
+  // ------------------------------------------------------
   const tour = await TourModel.findByIdAndDelete(id)
   if (!tour) {
     const message = 'could not find tour with id ${id}'
@@ -119,7 +131,9 @@ const getMonthlyPlan = tryCatch(async (request, response) => {
   const {
     params: { year },
   } = request
-
+  // ------------------------------------------------------
+  // FIXME: add AJV/JOI validation to request.body values
+  // ------------------------------------------------------
   const pipeline: any[] = [
     // (1) for each start date in each tour, make a new document
     { $unwind: '$startDates' },
