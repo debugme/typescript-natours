@@ -8,6 +8,7 @@ import { buildReviewRouter } from '../routers/reviewRouter'
 export const buildTourRouter = (services: Services) => {
   const tourRouter = Router()
 
+  // delegate to review router to handler request
   const reviewRouter = buildReviewRouter(services)
   tourRouter.use('/:tourId/reviews', reviewRouter)
 

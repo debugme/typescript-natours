@@ -1,7 +1,7 @@
 import { ErrorRequestHandler, Request, Response, NextFunction } from 'express'
 import { StatusCodes } from 'http-status-codes'
 
-import { StatusTexts } from '../utilities/controllerUtils'
+import { StatusTexts } from './utilities'
 
 type ErrorType = Error & { statusCode?: number; status?: string }
 

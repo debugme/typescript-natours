@@ -1,11 +1,7 @@
 import { Request } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { pick } from 'ramda'
-import {
-  StatusTexts,
-  tryCatch,
-  ServerError,
-} from '../utilities/controllerUtils'
+import { StatusTexts, tryCatch, ServerError } from './utilities'
 import {
   buildAccessToken,
   hashResetToken,
@@ -111,8 +107,8 @@ const validateIsAuthenticated = (services: Services) =>
     next()
   })
 
-const validateIsAuthorised = (services: Services, ...roles: string[]) => {
-  return tryCatch(async (request, response, next) => {
+const validateIsAuthorised = (services: Services, ...roles: string[]) =>
+  tryCatch(async (request, response, next) => {
     const { context } = services
     const role = context.getUserDocument().role.toString()
     if (!roles.includes(role))
@@ -122,7 +118,6 @@ const validateIsAuthorised = (services: Services, ...roles: string[]) => {
       )
     next()
   })
-}
 
 const validateForgotPassword = (services: Services) =>
   tryCatch(async (request, response, next) => {

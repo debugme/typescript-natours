@@ -9,7 +9,7 @@ import {
   ServerError,
   StatusTexts,
   tryCatch,
-} from '../utilities/controllerUtils'
+} from './utilities'
 
 const createTour = tryCatch(async (request, response) => {
   const tour = await TourModel.create(request.body)

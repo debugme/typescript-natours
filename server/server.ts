@@ -81,14 +81,11 @@ export class Server {
 
   public disconnect = () => {
     const promise = new Promise((resolve, reject) => {
-      if (this.httpServer) {
-        this.httpServer.close(() => {
-          console.log('[server] disconnected...')
-          resolve(null)
-        })
-      } else {
-        reject('error - already disconnected')
-      }
+      if (!this.httpServer) return reject('error - already disconnected')
+      this.httpServer.close(() => {
+        console.log('[server] disconnected...')
+        resolve(null)
+      })
     })
     return promise
   }

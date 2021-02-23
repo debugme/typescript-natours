@@ -1,5 +1,5 @@
 import { StatusCodes } from 'http-status-codes'
-import { ServerError, tryCatch } from '../utilities/controllerUtils'
+import { ServerError, tryCatch } from './utilities'
 
 const unknownRoute = tryCatch((request, response) => {
   const message = `Error - cannot find ${request.originalUrl} on server`

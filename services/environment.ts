@@ -49,12 +49,14 @@ export class Environment {
 
   public getNodeVariables = (): NodeVariables => {
     const fields = ['NODE_ENV', 'PWD']
-    return pick(fields, this.environment)
+    const variables = pick(fields, this.environment)
+    return variables
   }
 
   public getExpressVariables = (): ExpressVariables => {
     const fields = ['EXPRESS_PORT']
-    return pick(fields, this.environment)
+    const variables = pick(fields, this.environment)
+    return variables
   }
 
   public getMongoVariables = (): MongoVariables => {
@@ -65,16 +67,19 @@ export class Environment {
       'MONGO_HOSTNAME',
       'MONGO_DATABASE',
     ]
-    return pick(fields, this.environment)
+    const variables = pick(fields, this.environment)
+    return variables
   }
 
   public getJwtVariables = (): JwtVariables => {
     const fields = ['JWT_SECRET_KEY', 'JWT_EXPIRES_IN', 'COOKIE_EXPIRES_IN']
-    return pick(fields, this.environment)
+    const variables = pick(fields, this.environment)
+    return variables
   }
 
   public getEmailVariables = (): EmailVariables => {
     const fields = ['EMAIL_HOST', 'EMAIL_PORT', 'EMAIL_USER', 'EMAIL_PASS']
-    return pick(fields, this.environment)
+    const variables = pick(fields, this.environment)
+    return variables
   }
 }

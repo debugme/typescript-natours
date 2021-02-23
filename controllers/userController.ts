@@ -6,7 +6,7 @@ import {
   getSortFields,
   StatusTexts,
   tryCatch,
-} from '../utilities/controllerUtils'
+} from './utilities'
 
 import { UserModel, UserSchema } from '../models/userModel'
 import { StatusCodes } from 'http-status-codes'

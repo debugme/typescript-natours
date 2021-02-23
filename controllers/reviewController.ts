@@ -2,11 +2,7 @@ import { StatusCodes } from 'http-status-codes'
 import { pick } from 'ramda'
 import { ReviewModel, ReviewSchema } from '../models/reviewModel'
 import { TourModel } from '../models/tourModel'
-import {
-  ServerError,
-  StatusTexts,
-  tryCatch,
-} from '../utilities/controllerUtils'
+import { ServerError, StatusTexts, tryCatch } from './utilities'
 
 const getAllReviews = tryCatch(async (request, response) => {
   const { tourId } = request.params
